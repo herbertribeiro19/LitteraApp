@@ -1,21 +1,54 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import Welcome from "./src/views/Welcome";
 import Login from "./src/views/Login";
 import Register from "./src/views/Register";
 import Home from "./src/views/Home";
+import EditUser from "./src/views/EditUser";
 
 const Stack = createStackNavigator();
 
 export default function App() {
+  const [initialRoute, setInitialRoute] = useState(null);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
+        const hasSeenWelcome = await AsyncStorage.getItem("hasSeenWelcome");
+
+        if (isLoggedIn === "true") {
+          setInitialRoute("Home");
+        } else if (hasSeenWelcome === "true") {
+          setInitialRoute("Login");
+        } else {
+          setInitialRoute("Welcome");
+        }
+      } catch (error) {
+        console.error("Erro ao acessar AsyncStorage:", error);
+        setInitialRoute("Welcome");
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  if (!initialRoute) return null; // Evita piscar tela enquanto carrega
+
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName={initialRoute}
+        screenOptions={{ headerShown: false }}
+      >
         <Stack.Screen name="Welcome" component={Welcome} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Register" component={Register} />
-        {/* <Stack.Screen name="Home" component={Home} /> */}
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="EditUser" component={EditUser} />
       </Stack.Navigator>
     </NavigationContainer>
   );

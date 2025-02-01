@@ -13,6 +13,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { loginUser } from "../../services/api/authService";
+import { Eye, EyeOff } from "lucide-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Register() {
   const navigation = useNavigation();
@@ -25,6 +27,8 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
 
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   const handleNameChange = (text) => setName(text);
   const handlePhoneChange = (text) => setPhone(text);
   const handleEmailChange = (text) => setEmail(text);
@@ -36,14 +40,27 @@ export default function Register() {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
     }
-
     try {
       const userData = await loginUser(email, password);
-      Alert.alert("Sucesso", "Login realizado!");
-      console.log(userData); // Aqui você pode salvar o token se precisar
-      // navigation.navigate("Home");
+      console.log("Resposta da API:", userData); // Verifique a resposta da API
+
+      // Verificando se os dados necessários existem na resposta
+      if (!userData || !userData.token || !userData.userId) {
+        throw new Error("Resposta inválida do servidor");
+      }
+
+      // Armazenando o token e o ID do usuário no AsyncStorage
+      await AsyncStorage.setItem("token", userData.token);
+      await AsyncStorage.setItem("userId", userData.userId.toString()); // Armazenando o ID como string
+
+      await AsyncStorage.setItem("isLoggedIn", "true");
+      await AsyncStorage.setItem("hasSeenWelcome", "true");
+
+      console.log("Login realizado com sucesso, redirecionando para Home...");
+      navigation.navigate("Home");
     } catch (error) {
-      Alert.alert("Erro", error);
+      console.error("Erro ao fazer login:", error);
+      Alert.alert("Erro ao fazer login", error.message || "Ocorreu um erro");
     }
   };
 
@@ -64,15 +81,30 @@ export default function Register() {
                 onChangeText={handleEmailChange}
                 autoCapitalize="none"
               />
-              <TextInput
-                style={styles.input}
-                placeholder="Senha"
-                secureTextEntry
-                placeholderTextColor="#f1f1f1"
-                value={password}
-                onChangeText={handlePasswordChange}
-                autoCapitalize="none"
-              />
+
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.inputPassword}
+                  placeholder="Senha"
+                  placeholderTextColor="#f1f1f1"
+                  secureTextEntry={!isPasswordVisible}
+                  value={password}
+                  onChangeText={handlePasswordChange}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                  style={styles.eyeButton}
+                >
+                  <Text style={styles.eyeIcon}>
+                    {isPasswordVisible ? (
+                      <EyeOff size={24} color="#F5F3F1" />
+                    ) : (
+                      <Eye size={24} color="#F5F3F1" />
+                    )}
+                  </Text>
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity style={styles.btn} onPress={handleLogin}>
                 <Text style={styles.textBtn}>Entrar</Text>
               </TouchableOpacity>
@@ -141,6 +173,29 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 10,
     color: "#F5F3F1",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "86%",
+    alignSelf: "center",
+    borderBottomWidth: 2,
+    borderRadius: 6,
+    borderBottomColor: "#F5F3F1",
+    marginBottom: 10,
+  },
+  inputPassword: {
+    flex: 1,
+    fontSize: 16,
+    padding: 16,
+    color: "#F5F3F1",
+  },
+  eyeButton: {
+    padding: 12,
+  },
+  eyeIcon: {
+    fontSize: 18,
+    color: "#f1f1f1",
   },
   btn: {
     padding: 14,

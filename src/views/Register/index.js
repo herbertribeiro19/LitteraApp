@@ -13,10 +13,11 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { registerUser } from "../../services/api/authService";
+import { Eye, EyeOff } from "lucide-react-native";
 
 export default function Register() {
   const navigation = useNavigation();
-  const imageBG = require("../../assets/bgImgSignUp.png");
+  const imageBG = require("../../assets/bgImg.png");
   const logo = require("../../assets/logo.png");
 
   const [name, setName] = useState("");
@@ -25,13 +26,11 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
 
-  const handleNameChange = (text) => setName(text);
-  const handlePhoneChange = (text) => setPhone(text);
-  const handleEmailChange = (text) => setEmail(text);
-  const handlePasswordChange = (text) => setPassword(text);
-  const handleConfirmPasswordChange = (text) => setConfirmPassword(text);
+  // Estado para alternar visibilidade da senha
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleRegister = async () => {
+  const handleEditUser = async () => {
     if (!name || !email || !password || !confirmPassword || !phone) {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
@@ -43,8 +42,8 @@ export default function Register() {
     }
 
     try {
-      await registerUser(name, email, phone, password);
-      Alert.alert("Sucesso", "Conta criada com sucesso!");
+      await registerUser(name, email, password, phone);
+      Alert.alert("Sucesso", "Usuário atualizado com sucesso!");
       navigation.navigate("Login");
     } catch (error) {
       Alert.alert("Erro", error);
@@ -64,7 +63,7 @@ export default function Register() {
                 placeholder="Nome"
                 placeholderTextColor="#f1f1f1"
                 value={name}
-                onChangeText={handleNameChange}
+                onChangeText={setName}
                 autoCapitalize="none"
               />
               <TextInput
@@ -73,7 +72,7 @@ export default function Register() {
                 keyboardType="email-address"
                 placeholderTextColor="#f1f1f1"
                 value={email}
-                onChangeText={handleEmailChange}
+                onChangeText={setEmail}
                 autoCapitalize="none"
               />
               <TextInput
@@ -82,28 +81,58 @@ export default function Register() {
                 keyboardType="phone-pad"
                 placeholderTextColor="#f1f1f1"
                 value={phone}
-                onChangeText={handlePhoneChange}
+                onChangeText={setPhone}
                 autoCapitalize="none"
               />
-              <TextInput
-                style={styles.input}
-                placeholder="Senha"
-                secureTextEntry
-                placeholderTextColor="#f1f1f1"
-                value={password}
-                onChangeText={handlePasswordChange}
-                autoCapitalize="none"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Confirmar Senha"
-                secureTextEntry
-                placeholderTextColor="#f1f1f1"
-                value={confirmPassword}
-                onChangeText={handleConfirmPasswordChange}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity style={styles.btn} onPress={handleRegister}>
+
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.inputPassword}
+                  placeholder="Senha"
+                  placeholderTextColor="#f1f1f1"
+                  secureTextEntry={!isPasswordVisible}
+                  value={password}
+                  onChangeText={setPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                  style={styles.eyeButton}
+                >
+                  <Text style={styles.eyeIcon}>
+                    {isPasswordVisible ? (
+                      <EyeOff size={24} color="#F5F3F1" />
+                    ) : (
+                      <Eye size={24} color="#F5F3F1" />
+                    )}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.inputPassword}
+                  placeholder="Confirmar Senha"
+                  placeholderTextColor="#f1f1f1"
+                  secureTextEntry={!showConfirmPassword}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={styles.eyeButton}
+                >
+                  <Text style={styles.eyeIcon}>
+                    {showConfirmPassword ? (
+                      <EyeOff size={24} color="#F5F3F1" />
+                    ) : (
+                      <Eye size={24} color="#F5F3F1" />
+                    )}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity style={styles.btn} onPress={handleEditUser}>
                 <Text style={styles.textBtn}>Registrar</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -171,6 +200,29 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 10,
     color: "#F5F3F1",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "86%",
+    alignSelf: "center",
+    borderBottomWidth: 2,
+    borderRadius: 6,
+    borderBottomColor: "#F5F3F1",
+    marginBottom: 10,
+  },
+  inputPassword: {
+    flex: 1,
+    fontSize: 16,
+    padding: 16,
+    color: "#F5F3F1",
+  },
+  eyeButton: {
+    padding: 12,
+  },
+  eyeIcon: {
+    fontSize: 18,
+    color: "#f1f1f1",
   },
   btn: {
     padding: 14,
