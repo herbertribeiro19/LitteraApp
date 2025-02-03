@@ -34,7 +34,6 @@ export default function EditUser() {
       if (!token) throw new Error("Token não encontrado");
 
       const userData = await getUser(token);
-      console.log("Resposta do getUser:", userData);
 
       if (userData?.user) {
         setName(userData.user.name || "");
@@ -42,7 +41,7 @@ export default function EditUser() {
         setPhone(userData.user.phone || "");
       }
     } catch (error) {
-      console.error("Erro ao buscar usuário:", error);
+      // console.error("Erro ao buscar usuário:", error);
     }
   };
 
@@ -54,10 +53,13 @@ export default function EditUser() {
 
     try {
       await editUser(name, email, phone);
-      Alert.alert("Sucesso", "Dados atualizados com sucesso!");
+      Alert.alert("Sucesso", "Dados do usuário atualizado com sucesso!");
       navigation.goBack();
     } catch (error) {
-      Alert.alert("Erro", error);
+      Alert.alert(
+        "Erro ao atualizar",
+        "Verifique os dados do usuário e tente novamente."
+      );
     }
   };
 
@@ -134,19 +136,13 @@ const styles = StyleSheet.create({
   //     flexDirection: "column",
   //   },
   boxmain: {
-    marginTop: "34%",
+    marginTop: "24%",
     marginBottom: "10%",
     marginHorizontal: "8%",
     justifyContent: "left",
     flexDirection: "column",
     alignSelf: "left",
     gap: "10%",
-  },
-  logo: {
-    justifyContent: "center",
-    alignSelf: "center",
-    width: 110 * 1.3,
-    height: 126 * 1.3,
   },
   textbold: {
     color: "#631C11",

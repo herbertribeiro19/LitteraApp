@@ -5,7 +5,6 @@ import {
   View,
   FlatList,
   TouchableOpacity,
-  Image,
   TextInput,
   ActivityIndicator,
 } from "react-native";
@@ -20,7 +19,7 @@ import {
   Ghost,
   DoorClosed,
 } from "lucide-react-native";
-// import env from "../../../.env";
+import BannerCarousel from "../../components/Banners";
 
 export default function Home() {
   const [books, setBooks] = useState([]);
@@ -31,37 +30,37 @@ export default function Home() {
     {
       id: "1",
       category: "Fantasia",
-      icon: <Wand size={24} color="#fff" />,
+      icon: <Wand size={24} color="#F5F3F1" />,
     },
     {
       id: "2",
       category: "Ficção",
-      icon: <Sparkle size={24} color="#fff" />,
+      icon: <Sparkle size={24} color="#F5F3F1" />,
     },
     {
       id: "3",
       category: "Romance",
-      icon: <BookHeart size={24} color="#fff" />,
+      icon: <BookHeart size={24} color="#F5F3F1" />,
     },
     {
       id: "4",
       category: "Religioso",
-      icon: <Church size={24} color="#fff" />,
+      icon: <Church size={24} color="#F5F3F1" />,
     },
     {
       id: "5",
       category: "Infantil",
-      icon: <Baby size={24} color="#fff" />,
+      icon: <Baby size={24} color="#F5F3F1" />,
     },
     {
       id: "6",
       category: "Suspense",
-      icon: <DoorClosed size={24} color="#fff" />,
+      icon: <DoorClosed size={24} color="#F5F3F1" />,
     },
     {
       id: "7",
       category: "Terror",
-      icon: <Ghost size={24} color="#fff" />,
+      icon: <Ghost size={24} color="#F5F3F1" />,
     },
   ];
 
@@ -95,8 +94,11 @@ export default function Home() {
       style={styles.container}
     >
       <Header />
+      <View>
+        <BannerCarousel />
+      </View>
       <View style={styles.content}>
-        <Text style={styles.h1}>Categorias</Text>
+        <Text style={styles.h1}>Gêneros</Text>
         <View>
           <FlatList
             horizontal
@@ -164,6 +166,13 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "red",
     height: "100%",
+  },
+  banner: {
+    width: 380,
+    borderRadius: 20,
+    boxShadow: "0 2 10 gray",
+    margin: 10,
+    alignSelf: "center",
   },
   content: {
     flex: 1,

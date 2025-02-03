@@ -6,33 +6,59 @@ import {
   View,
   Alert,
   Modal,
+  Image,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { getUser } from "../../services/api/users";
-import { UserRoundPen, LogOut } from "lucide-react-native";
+import { UserRoundPen, LogOut, LibraryBig } from "lucide-react-native";
 
 export default function Header() {
   const navigation = useNavigation();
   const [userName, setUserName] = useState("");
   const [modalVisible, setModalVisible] = useState(false); // Estado para abrir/fechar o modal
+  const logoMale = require("../../assets/iconuserM.png"); // Ícone masculino
+  const logoFemale = require("../../assets/iconuserF.png"); // Ícone feminino
+  const logoSemGenero = require("../../assets/iconuserS.png"); // Ícone sem genero
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUser();
+    }, [])
+  );
+
+  const isFemale = (name) => {
+    // Função para verificar se o nome termina com "a", caso contrário, assume masculino
+    return name.toLowerCase().endsWith("a");
+  };
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("token");
-    await AsyncStorage.removeItem("isLoggedIn");
+    try {
+      // Buscar o userId antes de limpar os dados
+      const userId = await AsyncStorage.getItem("userId");
 
-    // Executa a navegação dentro de um `requestAnimationFrame` para garantir que o Alert seja fechado antes
-    requestAnimationFrame(() => {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Login" }],
+      if (!userId) {
+        console.log("Erro: Nenhum usuário logado.");
+        return;
+      }
+
+      // Remover apenas os dados de login
+      await AsyncStorage.removeItem("isLoggedIn");
+      await AsyncStorage.removeItem("token");
+      await AsyncStorage.removeItem("userId");
+
+      // Redirecionar para a tela de Login
+      requestAnimationFrame(() => {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Login" }],
+        });
       });
-    });
+    } catch (error) {
+      console.log("Erro ao fazer logout:", error);
+    }
   };
 
   const confirmLogout = () => {
@@ -45,6 +71,11 @@ export default function Header() {
       ],
       { cancelable: false }
     );
+  };
+
+  const handlePreferencies = () => {
+    setModalVisible(false);
+    navigation.navigate("Preferencies");
   };
 
   const handleEditUser = () => {
@@ -67,7 +98,7 @@ export default function Header() {
         throw new Error("Nome do usuário não encontrado");
       }
     } catch (error) {
-      console.error("Erro ao buscar usuário:", error);
+      console.log("Erro ao buscar usuário:", error);
     }
   };
 
@@ -77,7 +108,10 @@ export default function Header() {
         style={styles.buttonCircle}
         onPress={() => setModalVisible(true)}
       >
-        <AntDesign name="user" size={26} color="#631C11" />
+        <Image
+          source={isFemale(userName) ? logoFemale : logoMale}
+          style={styles.logo}
+        />
       </TouchableOpacity>
       <Text style={styles.name}>
         Olá, <Text style={styles.nameuser}>{userName || "Usuário"}</Text>
@@ -98,6 +132,13 @@ export default function Header() {
             >
               <UserRoundPen size={18} color="#631C11" />
               <Text style={styles.modalText}>Editar Usuário</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalOption}
+              onPress={handlePreferencies}
+            >
+              <LibraryBig size={18} color="#631C11" />
+              <Text style={styles.modalText}>Preferências</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.modalOption}
@@ -132,6 +173,10 @@ const styles = StyleSheet.create({
     padding: 12,
     flexDirection: "row",
   },
+  logo: {
+    width: 40,
+    height: 40,
+  },
   name: {
     fontSize: 18,
     color: "#631C11",
@@ -140,16 +185,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#631C11",
     fontWeight: "600",
-  },
-  buttonCircle: {
-    width: 44,
-    height: 44,
-    backgroundColor: "#E4D5D2",
-    borderRadius: 40,
-    borderColor: "#631C11",
-    borderWidth: 0.2,
-    justifyContent: "center",
-    alignItems: "center",
   },
   modalContainer: {
     flex: 1,

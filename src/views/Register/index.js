@@ -30,7 +30,7 @@ export default function Register() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleEditUser = async () => {
+  const handleCreateUser = async () => {
     if (!name || !email || !password || !confirmPassword || !phone) {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
@@ -43,10 +43,13 @@ export default function Register() {
 
     try {
       await registerUser(name, email, password, phone);
-      Alert.alert("Sucesso", "Usuário atualizado com sucesso!");
+      Alert.alert("Sucesso", "Usuário criado com sucesso!");
       navigation.navigate("Login");
     } catch (error) {
-      Alert.alert("Erro", error);
+      Alert.alert(
+        "Erro ao criar novo registro",
+        "Verifique as informações e tente novamente."
+      );
     }
   };
 
@@ -132,7 +135,7 @@ export default function Register() {
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity style={styles.btn} onPress={handleEditUser}>
+              <TouchableOpacity style={styles.btn} onPress={handleCreateUser}>
                 <Text style={styles.textBtn}>Registrar</Text>
               </TouchableOpacity>
               <TouchableOpacity

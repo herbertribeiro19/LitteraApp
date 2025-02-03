@@ -16,7 +16,7 @@ import { loginUser } from "../../services/api/authService";
 import { Eye, EyeOff } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function Register() {
+export default function Login() {
   const navigation = useNavigation();
   const imageBG = require("../../assets/bgImgSignUp.png");
   const logo = require("../../assets/logo.png");
@@ -42,25 +42,40 @@ export default function Register() {
     }
     try {
       const userData = await loginUser(email, password);
-      console.log("Resposta da API:", userData); // Verifique a resposta da API
+      console.log("Resposta da API:", userData);
 
-      // Verificando se os dados necessários existem na resposta
       if (!userData || !userData.token || !userData.userId) {
         throw new Error("Resposta inválida do servidor");
       }
 
-      // Armazenando o token e o ID do usuário no AsyncStorage
+      const userId = userData.userId.toString(); // Convertendo para string para evitar erros no AsyncStorage
+
       await AsyncStorage.setItem("token", userData.token);
-      await AsyncStorage.setItem("userId", userData.userId.toString()); // Armazenando o ID como string
-
+      await AsyncStorage.setItem("userId", userId);
       await AsyncStorage.setItem("isLoggedIn", "true");
-      await AsyncStorage.setItem("hasSeenWelcome", "true");
 
-      console.log("Login realizado com sucesso, redirecionando para Home...");
-      navigation.navigate("Home");
+      // Buscar se esse usuário já selecionou preferências
+      const hasSelectedPreferences = await AsyncStorage.getItem(
+        `hasSelectedPreferences_${userId}`
+      );
+
+      console.log("hasSelectedPreferences após login:", hasSelectedPreferences);
+
+      if (hasSelectedPreferences === "true") {
+        console.log("Login realizado com sucesso, redirecionando para Home...");
+        navigation.navigate("HomeTabs");
+      } else {
+        console.log(
+          "Login realizado com sucesso, redirecionando para Preferências..."
+        );
+        navigation.navigate("Preferencies");
+      }
     } catch (error) {
-      console.error("Erro ao fazer login:", error);
-      Alert.alert("Erro ao fazer login", error.message || "Ocorreu um erro");
+      console.log("Erro ao fazer login:", error);
+      Alert.alert(
+        "Erro ao fazer login",
+        "Verifique as informações e tente novamente."
+      );
     }
   };
 
