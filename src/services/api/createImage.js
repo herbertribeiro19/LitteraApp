@@ -1,7 +1,7 @@
 import api from "./api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const createBook = async (bookData) => {
+export const createImage = async (imageData) => {
   try {
     // Recupera o token e o userId armazenados
     const token = await AsyncStorage.getItem("token");
@@ -14,18 +14,19 @@ export const createBook = async (bookData) => {
 
     // Envia a requisição POST para salvar as preferências
     const response = await api.post(
-      `/books`, // Passando o userId na URL (se necessário)
-      bookData, // Envia o payload com os dados do livro
+      `/imagens`, // Passando o userId na URL (se necessário)
+      imageData, // Envia o payload com os dados do livro
       {
         headers: {
           Authorization: `Bearer ${token}`, // Passando o token no cabeçalho
         },
       }
     );
+    console.log("Resposta da API para upload de imagem:", response);
 
     return response.data;
   } catch (error) {
-    console.log("Erro ao Salvar Livro:", error);
-    throw error.response ? error.response.data : "Erro ao Salvar Livro";
+    console.log("Erro ao Salvar Imagem:", error);
+    throw error.response ? error.response.data : "Erro ao Salvar Imagem";
   }
 };

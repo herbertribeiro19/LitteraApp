@@ -25,7 +25,7 @@ const BottomTabs = () => {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: "#631C11",
-          height: 110, // Ajuste a altura do tab bar se necessário
+          height: 90, // Ajuste a altura do tab bar se necessário
           justifyContent: "center", // Garante que os itens sejam centralizados
           position: "center",
           borderRadius: 16,
