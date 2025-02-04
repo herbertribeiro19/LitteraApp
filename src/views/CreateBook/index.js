@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -26,8 +28,8 @@ import { Image } from "react-native";
 export default function CreateBook() {
   const navigation = useNavigation();
 
-  const [image, setImage] = useState(null);
-  const [imageBase64, setImageBase64] = useState("");
+  const [images, setImages] = useState([]); // Lista de imagens URI
+  const [imagesBase64, setImagesBase64] = useState([]); // Lista de imagens Base64
 
   const [nome, setNome] = useState("");
   const [description, setDescription] = useState("");
@@ -37,12 +39,12 @@ export default function CreateBook() {
   const [statusBookId, setStatusBookId] = useState("");
   const [transactions, setTransactions] = useState([]);
   const [transactionId, setTransactionId] = useState("");
-  const [valor, setValor] = useState("");
+  const [value, setValue] = useState("");
   const [isFocusGeneros, setIsFocusGeneros] = useState(false);
   const [isFocusStatusBook, setIsFocusStatusBook] = useState(false);
   const [isFocusTransaction, setIsFocusTransaction] = useState(false);
-
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // Estado para controlar o loading
 
   useEffect(() => {
     (async () => {
@@ -76,13 +78,26 @@ export default function CreateBook() {
         aspect: [4, 3],
         quality: 1,
         base64: true,
+        allowsMultipleSelection: true, // Permite múltiplas imagens
       });
     }
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      setImageBase64(result.assets[0].base64);
+      const newImages = result.assets.map((asset) => asset.uri);
+      const newImagesBase64 = result.assets.map((asset) => asset.base64);
+
+      setImages((prev) => [...prev, ...newImages]);
+      setImagesBase64((prev) => [...prev, ...newImagesBase64]);
     }
+  };
+
+  // Função para remover uma imagem
+  const removeImage = (index) => {
+    const newImages = images.filter((_, i) => i !== index);
+    const newImagesBase64 = imagesBase64.filter((_, i) => i !== index);
+
+    setImages(newImages);
+    setImagesBase64(newImagesBase64);
   };
 
   useEffect(() => {
@@ -139,65 +154,58 @@ export default function CreateBook() {
       return;
     }
 
+    setIsLoading(true); // Ativa o loading
+
+    const formattedValor = value !== "" ? Number(value) : null;
+
     const newBook = {
       nome,
       description,
       TypeTransactionId: Number(transactionId),
       generos: generoIds.map(Number),
       StatusBookId: Number(statusBookId),
-      valor: valor !== null ? Number(valor) : null,
+      value: formattedValor,
     };
 
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) throw new Error("Token não encontrado");
 
-      // Primeiro cria o livro e obtém o BookId
       const bookResponse = await createBook(newBook);
-      console.log("Resposta da API:", bookResponse); // Log para depuração
-
-      const bookId = bookResponse?.book?.id; // Ajustado para acessar corretamente o ID
+      const bookId = bookResponse?.book?.id;
 
       if (!bookId || typeof bookId !== "number") {
-        console.error("ID inválido recebido:", bookResponse);
         throw new Error("Erro ao obter o ID do livro.");
       }
 
-      Alert.alert("Sucesso", "Livro criado com sucesso!");
-
-      // Agora, se houver uma imagem, envia associada ao BookId
-      if (imageBase64) {
-        const newImage = {
-          fileName: "capa_livro.jpg",
-          fileContent: imageBase64,
-          fileType: "image/jpeg",
-          BookId: bookId, // Associando ao livro recém-criado
+      if (imagesBase64.length > 0) {
+        const newImagePayload = {
+          imagens: imagesBase64.map((base64, index) => ({
+            fileName: `imagem_${index + 1}.jpg`,
+            fileContent: base64,
+            fileType: "image/jpeg",
+            BookId: bookId,
+          })),
         };
 
-        // console.log("BASE 64 CODE IMAGE: ", imageBase64);
-
-        try {
-          await createImage(newImage);
-          Alert.alert("Sucesso", "Imagem adicionada com sucesso!");
-        } catch (error) {
-          console.log("Erro ao subir Imagem:", error);
-          Alert.alert("Erro", "Não foi possível subir a imagem.");
-        }
+        await createImage(newImagePayload);
       }
 
-      // Resetar os campos do formulário
+      // Resetar os campos
       setNome("");
       setDescription("");
       setGeneroIds([]);
       setStatusBookId("");
       setTransactionId("");
-      setValor("");
-      setImage(null);
-      setImageBase64("");
+      setValue(null);
+      setImages([]);
+      setImagesBase64([]);
 
-      navigation.goBack();
+      setIsLoading(false); // Desativa o loading
+
+      navigation.navigate("Home"); // Redireciona para a Home principal
     } catch (error) {
-      console.log("Erro ao criar livro:", error);
+      setIsLoading(false); // Desativa o loading em caso de erro
       Alert.alert("Erro", `Não foi possível criar o livro: ${error.message}`);
     }
   };
@@ -210,33 +218,48 @@ export default function CreateBook() {
       <View style={styles.boxmain}>
         <Text style={styles.textbold}>Criar Anúncio</Text>
         <Text style={styles.textspan}>
-          Preencha as informações do item que deseja vender, trocar ou doar.
+          Preencha as informações do livro que deseja vender, trocar ou doar.
         </Text>
       </View>
       <ScrollView
         contentContainerStyle={[styles.boxListForm, { flexGrow: 1 }]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={{ alignItems: "center", marginVertical: 10 }}>
-          {image && (
-            <Image
-              source={{ uri: image }}
-              style={{ width: 150, height: 150, borderRadius: 10 }}
-            />
-          )}
+        <Text style={styles.iconButtonText}>Imagem do livro</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.imageContainer}
+        >
+          {images.map((img, index) => (
+            <View key={index} style={styles.imageWrapper}>
+              <Image source={{ uri: img }} style={styles.image} />
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={() => removeImage(index)}
+              >
+                <AntDesign name="delete" size={20} color="#631C11" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
 
+        {/* Botões para adicionar imagens */}
+        <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={styles.uploadButton}
+            style={styles.iconButton}
             onPress={() => pickImage(false)}
           >
-            <Text style={styles.uploadButtonText}>Selecionar imagem</Text>
+            <AntDesign name="picture" size={24} color="#631C11" />
+            <Text style={styles.iconButtonText}>Galeria</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.uploadButton}
+            style={styles.iconButton}
             onPress={() => pickImage(true)}
           >
-            <Text style={styles.uploadButtonText}>Tirar foto</Text>
+            <AntDesign name="camera" size={24} color="#631C11" />
+            <Text style={styles.iconButtonText}>Câmera</Text>
           </TouchableOpacity>
         </View>
 
@@ -348,13 +371,13 @@ export default function CreateBook() {
         {(transactionId === "1" || transactionId === "2") && (
           <TextInput
             style={styles.input}
-            value={valor}
+            value={value}
             onChangeText={(text) => {
               // Permite apenas números
               const numericValue = text.replace(/[^0-9]/g, ""); // Remove tudo que não for número
-              setValor(numericValue); // Atualiza o valor apenas com números
+              setValue(numericValue); // Atualiza o valor apenas com números
             }}
-            placeholder="Valor"
+            placeholder="Valor do livro"
             keyboardType="numeric"
           />
         )}
@@ -370,6 +393,16 @@ export default function CreateBook() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Modal de Loading */}
+      <Modal transparent={true} visible={isLoading}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <ActivityIndicator size="large" color="#631C11" />
+            <Text style={styles.modalText}>Criando anúncio...</Text>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
@@ -385,6 +418,45 @@ const styles = StyleSheet.create({
     marginTop: "1%",
     fontSize: 10,
     fontWeight: "300",
+  },
+  imageContainer: {
+    paddingTop: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  image: {
+    width: 120,
+    height: 120,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  removeButton: {
+    position: "absolute",
+    top: 4,
+    right: 14,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 14,
+    padding: 5,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 20,
+  },
+  iconButton: {
+    alignItems: "center",
+    // backgroundColor: "#F5F3F1",
+    padding: 8,
+    borderRadius: 10,
+    width: "45%",
+    borderWidth: 0.6,
+    borderColor: "#631C11",
+  },
+  iconButtonText: {
+    marginTop: 5,
+    color: "#631C11",
+    fontSize: 14,
   },
   boxListForm: {
     marginHorizontal: "7%",
@@ -410,6 +482,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#631C11",
   },
+
   dropdown: {
     borderBottomWidth: 2,
     borderBottomColor: "#631C11",
@@ -436,6 +509,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   content: {
+    marginTop: "4%",
     marginBottom: "10%",
   },
   btnSave: {
@@ -466,5 +540,23 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     fontSize: 18,
     fontWeight: "500",
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    width: 200,
+    padding: 20,
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#631C11",
   },
 });

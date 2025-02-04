@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     marginTop: "14%",
     width: "96%",
-    height: "10%",
+    height: "11%",
     gap: 8,
     alignItems: "center",
     padding: 12,

@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   Text,
   View,
   FlatList,
   TouchableOpacity,
-  TextInput,
   ActivityIndicator,
+  Image,
+  RefreshControl,
+  Alert,
 } from "react-native";
 import Header from "../../components/Header";
 import { LinearGradient } from "expo-linear-gradient";
@@ -20,73 +22,111 @@ import {
   DoorClosed,
 } from "lucide-react-native";
 import BannerCarousel from "../../components/Banners";
+import { getBook } from "../../services/api/book";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 export default function Home() {
+  const navigation = useNavigation();
   const [books, setBooks] = useState([]);
-  const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const list = [
-    {
-      id: "1",
-      category: "Fantasia",
-      icon: <Wand size={24} color="#F5F3F1" />,
-    },
+    { id: "1", category: "Fantasia", icon: <Wand size={20} color="#F5F3F1" /> },
     {
       id: "2",
       category: "Ficção",
-      icon: <Sparkle size={24} color="#F5F3F1" />,
+      icon: <Sparkle size={20} color="#F5F3F1" />,
     },
     {
       id: "3",
       category: "Romance",
-      icon: <BookHeart size={24} color="#F5F3F1" />,
+      icon: <BookHeart size={20} color="#F5F3F1" />,
     },
     {
       id: "4",
       category: "Religioso",
-      icon: <Church size={24} color="#F5F3F1" />,
+      icon: <Church size={20} color="#F5F3F1" />,
     },
-    {
-      id: "5",
-      category: "Infantil",
-      icon: <Baby size={24} color="#F5F3F1" />,
-    },
+    { id: "5", category: "Infantil", icon: <Baby size={20} color="#F5F3F1" /> },
     {
       id: "6",
       category: "Suspense",
-      icon: <DoorClosed size={24} color="#F5F3F1" />,
+      icon: <DoorClosed size={20} color="#F5F3F1" />,
     },
-    {
-      id: "7",
-      category: "Terror",
-      icon: <Ghost size={24} color="#F5F3F1" />,
-    },
+    { id: "7", category: "Terror", icon: <Ghost size={20} color="#F5F3F1" /> },
   ];
 
-  // Função para buscar livros com base na entrada
-  //   const fetchBooks = async () => {
-  //     setIsLoading(true); // Inicia o carregamento
-  //     try {
-  //       const response = await axios.get(GOOGLE_BOOKS_API_URL, {
-  //         params: {
-  //           q: search,
-  //           key: API_KEY,
-  //         },
-  //       });
-  //       setBooks(response.data.items || []);
-  //     } catch (error) {
-  //       console.error("Erro ao buscar livros: ", error);
-  //       setBooks([]);
-  //     } finally {
-  //       setIsLoading(false); // Finaliza o carregamento
-  //     }
-  //   };
+  // Função para buscar os livros e ordená-los do mais recente para o mais antigo
+  const fetchBooks = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getBook();
 
-  //   // useEffect para chamada inicial da API ao carregar o componente
-  //   useEffect(() => {
-  //     fetchBooks();
-  //   }, []);
+      if (response.books) {
+        // Ordena os livros do mais recente para o mais antigo
+        const sortedBooks = response.books.sort((a, b) => b.id - a.id);
+        setBooks(sortedBooks);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar livros:", error);
+      Alert.alert("Erro", "Não foi possível carregar os livros.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Atualiza automaticamente quando a tela for focada
+  useFocusEffect(
+    useCallback(() => {
+      fetchBooks();
+    }, [])
+  );
+
+  // Função de refresh ao puxar para baixo
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchBooks();
+    setRefreshing(false);
+  };
+
+  const renderBookItem = ({ item }) => {
+    const hasImage = item.imagens && item.imagens.trim() !== "";
+
+    return (
+      <TouchableOpacity
+        style={styles.bookItem}
+        onPress={() => navigation.navigate("BookDetails", { book: item })}
+      >
+        {hasImage ? (
+          <Image source={{ uri: item.imagens }} style={styles.bookImage} />
+        ) : (
+          <View style={styles.bookImagePlaceholder}>
+            <Text style={styles.placeholderText}>Sem imagem</Text>
+          </View>
+        )}
+        <View style={styles.bookInfo}>
+          <Text style={styles.bookTitle}>{item.nome}</Text>
+          <Text style={styles.bookDetailBold}>{item.StatusBook.name}</Text>
+          <Text style={styles.bookDetail}>
+            Disponível para{" "}
+            <Text style={styles.bookDetailBold}>
+              {item.TypeTransaction.name}
+            </Text>
+          </Text>
+
+          <Text style={styles.bookDetail}>
+            <Text style={styles.generoBadge}>
+              {item.Generos.map((genero) => genero.name).join(", ")}
+            </Text>
+          </Text>
+          {item.value && (
+            <Text style={styles.bookValue}>R$ {item.value},00</Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <LinearGradient
@@ -94,94 +134,71 @@ export default function Home() {
       style={styles.container}
     >
       <Header />
-      <View>
-        <BannerCarousel />
-      </View>
-      <View style={styles.content}>
-        <Text style={styles.h1}>Gêneros</Text>
-        <View>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.list}
-            data={list}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={styles.item}>
-                {item.icon}
-                <Text style={styles.textCategorias}>{item.category}</Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item.id} // Usando o id como chave para garantir unicidade
-          />
-        </View>
 
-        {/* <TextInput
-          style={styles.searchInput}
-          placeholder="Pesquise livro"
-          value={search}
-          placeholderTextColor={"#631C11"}
-          onChangeText={(text) => setSearch(text)}
-          //   onSubmitEditing={fetchBooks}
-        /> */}
-        {/* <Text style={styles.h1}>Livros</Text> */}
+      <FlatList
+        ListHeaderComponent={
+          <>
+            <View>
+              <BannerCarousel />
+            </View>
 
-        {/* {isLoading ? (
-          <ActivityIndicator
-            size="large"
-            color="#631C11"
-            style={styles.loader}
-          />
-        ) : (
-          <FlatList
-            style={styles.list}
-            data={books}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.bookItem}>
-                {item.volumeInfo.imageLinks?.thumbnail && (
-                  <Image
-                    source={{ uri: item.volumeInfo.imageLinks.thumbnail }}
-                    style={styles.thumbnail}
-                  />
+            <Text style={styles.h1}>Gêneros</Text>
+            <View>
+              <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.list}
+                data={list}
+                renderItem={({ item }) => (
+                  <TouchableOpacity style={styles.item}>
+                    {item.icon}
+                    <Text style={styles.textCategorias}>{item.category}</Text>
+                  </TouchableOpacity>
                 )}
-                <View style={styles.bookInfo}>
-                  <Text style={styles.title}>{item.volumeInfo.title}</Text>
-                  <Text>{item.volumeInfo.authors?.join(", ")}</Text>
-                  <Text>{item.volumeInfo.publishedDate}</Text>
-                </View>
-              </View>
-            )}
-            ListEmptyComponent={<Text>Nenhum livro encontrado.</Text>}
-          />
-        )} */}
-      </View>
+                keyExtractor={(item) => item.id}
+              />
+            </View>
+
+            <Text style={styles.h1}>Livros</Text>
+          </>
+        }
+        data={books}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderBookItem}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListEmptyComponent={
+          isLoading ? (
+            <ActivityIndicator
+              size="large"
+              color="#631C11"
+              style={styles.loader}
+            />
+          ) : (
+            <Text style={styles.emptyText}>Nenhum livro encontrado.</Text>
+          )
+        }
+      />
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: "center",
+    flex: 1,
     paddingHorizontal: 6,
-    width: "100%",
-    backgroundColor: "red",
-    height: "100%",
-  },
-  banner: {
-    width: 380,
-    borderRadius: 20,
-    boxShadow: "0 2 10 gray",
-    margin: 10,
-    alignSelf: "center",
   },
   content: {
-    flex: 1,
-    gap: 20,
+    paddingTop: "4%",
+    paddingBottom: "20%",
   },
   h1: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "500",
+    marginBottom: 10,
     marginLeft: 10,
+    marginTop: 20,
     color: "#631C11",
   },
   list: {
@@ -193,53 +210,87 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     marginRight: 15,
-    gap: 6,
-    padding: 18,
+    minWidth: 90,
+    gap: 4,
+    padding: 14,
     borderRadius: 14,
   },
   textCategorias: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "500",
     color: "white",
   },
-
-  //   list: {
-  //     marginTop: -20,
-  //   },
-  //   searchInput: {
-  //     height: "8%",
-  //     width: "96%",
-  //     borderRadius: 30,
-  //     padding: 18,
-  //     borderWidth: 0.5,
-  //     backgroundColor: "#f1f1f1",
-  //     borderColor: "#631C11",
-  //     color: "#631C11",
-  //     alignSelf: "center",
-  //     fontSize: 16,
-  //   },
-  //   bookItem: {
-  //     flexDirection: "row",
-  //     alignItems: "center",
-  //     padding: 4,
-  //     backgroundColor: "#f9f9f9",
-  //     borderRadius: 10,
-  //     margin: 4,
-  //   },
-  //   thumbnail: {
-  //     width: 90,
-  //     height: 120,
-  //     marginRight: 10,
-  //   },
-  //   bookInfo: {
-  //     flex: 1,
-  //   },
-  //   title: {
-  //     fontWeight: "bold",
-  //     fontSize: 18,
-  //   },
-  //   loader: {
-  //     marginTop: 20,
-  //     alignSelf: "center",
-  //   },
+  bookItem: {
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    padding: 15,
+    marginHorizontal: 10,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  bookImage: {
+    width: 80,
+    height: 120,
+    borderRadius: 10,
+    marginRight: 15,
+  },
+  bookImagePlaceholder: {
+    width: 80,
+    height: 120,
+    borderRadius: 10,
+    marginRight: 15,
+    backgroundColor: "#E4D5D2",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  placeholderText: {
+    color: "#631C11",
+    fontSize: 12,
+    textAlign: "center",
+  },
+  bookInfo: {
+    flex: 1,
+  },
+  bookTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#631C11",
+    marginBottom: 5,
+  },
+  bookValue: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#631C11",
+  },
+  bookDescription: {
+    fontSize: 14,
+    color: "#555",
+    marginBottom: 10,
+  },
+  bookDetail: {
+    fontSize: 12,
+    color: "#777",
+    marginBottom: 5,
+  },
+  bookDetailBold: {
+    fontSize: 12,
+    color: "#777",
+    marginBottom: 5,
+    fontWeight: "600",
+  },
+  loader: {
+    marginTop: 20,
+    alignSelf: "center",
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 20,
+    color: "#631C11",
+  },
 });

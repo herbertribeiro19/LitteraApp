@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     boxShadow: "0 2 10 gray",
     borderRadius: 20,
+    marginTop: 14,
   },
   bannerContainer: {
     width: "370",
