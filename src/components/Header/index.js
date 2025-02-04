@@ -166,12 +166,15 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "transparent",
     marginTop: "14%",
-    width: "96%",
+    width: "100%",
     height: "11%",
     gap: 8,
     alignItems: "center",
     padding: 12,
+
     flexDirection: "row",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   logo: {
     width: 40,
