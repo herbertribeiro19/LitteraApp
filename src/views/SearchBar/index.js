@@ -44,7 +44,7 @@ export default function SearchBar() {
         setFilteredBooks(response.books);
       }
     } catch (error) {
-      console.error("Erro ao buscar livros:", error);
+      console.log("Erro ao buscar livros:", error);
       Alert.alert("Erro", "Não foi possível carregar os livros.");
     } finally {
       setIsLoading(false);
@@ -58,7 +58,7 @@ export default function SearchBar() {
         setGenres(response.genero.map((genre) => genre.name));
       }
     } catch (error) {
-      console.error("Erro ao buscar gêneros:", error);
+      console.log("Erro ao buscar gêneros:", error);
     }
   };
 

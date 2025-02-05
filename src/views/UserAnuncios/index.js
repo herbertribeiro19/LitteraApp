@@ -36,7 +36,7 @@ export default function UserAnuncios() {
 
         setBooks(userBooks); // Atualiza o estado apenas com os livros do usuário
       } catch (error) {
-        console.error("Erro ao buscar livros:", error);
+        console.log("Erro ao buscar livros:", error);
         Alert.alert("Erro", "Não foi possível carregar os anúncios.");
       } finally {
         setLoading(false);

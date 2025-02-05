@@ -45,7 +45,7 @@ export default function BookDetails({ route }) {
         const bookData = await getBookId(book.id);
         setImagens(bookData.book.imagens || []);
       } catch (error) {
-        console.error("Erro ao carregar imagens:", error);
+        console.log("Erro ao carregar imagens:", error);
       } finally {
         setLoading(false);
       }
@@ -65,7 +65,7 @@ export default function BookDetails({ route }) {
           : "Interesse registrado com sucesso!"
       );
     } catch (error) {
-      console.error("Erro ao demonstrar interesse:", error);
+      console.log("Erro ao demonstrar interesse:", error);
       Alert.alert("Erro", "Não foi possível processar sua solicitação.");
     }
   };
@@ -76,7 +76,7 @@ export default function BookDetails({ route }) {
       const message = `${book.nome}\n${book.description}\nAcesse: ${bookUrl}`;
       await Share.share({ message });
     } catch (error) {
-      console.error("Erro ao compartilhar:", error);
+      console.log("Erro ao compartilhar:", error);
     }
   };
 
@@ -128,11 +128,9 @@ export default function BookDetails({ route }) {
         scrollEventThrottle={16}
       >
         {loading ? (
-          <ActivityIndicator
-            size="large"
-            color="#631C11"
-            style={styles.loader}
-          />
+          <View style={styles.loader}>
+            <ActivityIndicator size="large" color="#631C11" />
+          </View>
         ) : imagens.length > 0 ? (
           <Swiper
             style={styles.swiper}
@@ -232,6 +230,10 @@ export default function BookDetails({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loader: {
+    marginTop: 200,
+    backgroundColor: "red",
   },
   content: {
     paddingBottom: 100, // Espaço extra para o botão fixo

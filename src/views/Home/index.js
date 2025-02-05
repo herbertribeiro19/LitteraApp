@@ -9,85 +9,97 @@ import {
   Image,
   RefreshControl,
   Alert,
+  TextInput,
 } from "react-native";
 import Header from "../../components/Header";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  Sparkle,
-  Wand,
-  BookHeart,
-  Church,
-  Baby,
-  Ghost,
-  DoorClosed,
-} from "lucide-react-native";
 import BannerCarousel from "../../components/Banners";
 import { getBook } from "../../services/api/book";
+import { getGenero } from "../../services/api/genero";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Home() {
   const navigation = useNavigation();
   const [books, setBooks] = useState([]);
+  const [filteredBooks, setFilteredBooks] = useState([]);
+  const [genres, setGenres] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState(null);
 
-  const list = [
-    { id: "1", category: "Fantasia", icon: <Wand size={20} color="#F5F3F1" /> },
-    {
-      id: "2",
-      category: "Ficção",
-      icon: <Sparkle size={20} color="#F5F3F1" />,
-    },
-    {
-      id: "3",
-      category: "Romance",
-      icon: <BookHeart size={20} color="#F5F3F1" />,
-    },
-    {
-      id: "4",
-      category: "Religioso",
-      icon: <Church size={20} color="#F5F3F1" />,
-    },
-    { id: "5", category: "Infantil", icon: <Baby size={20} color="#F5F3F1" /> },
-    {
-      id: "6",
-      category: "Suspense",
-      icon: <DoorClosed size={20} color="#F5F3F1" />,
-    },
-    { id: "7", category: "Terror", icon: <Ghost size={20} color="#F5F3F1" /> },
-  ];
-
-  // Função para buscar os livros e ordená-los do mais recente para o mais antigo
   const fetchBooks = async () => {
     setIsLoading(true);
     try {
       const response = await getBook();
-
       if (response.books) {
-        // Ordena os livros do mais recente para o mais antigo
         const sortedBooks = response.books.sort((a, b) => b.id - a.id);
         setBooks(sortedBooks);
+        setFilteredBooks(sortedBooks);
       }
     } catch (error) {
-      console.error("Erro ao buscar livros:", error);
+      console.log("Erro ao buscar livros:", error);
       Alert.alert("Erro", "Não foi possível carregar os livros.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Atualiza automaticamente quando a tela for focada
+  const fetchGenres = async () => {
+    try {
+      const response = await getGenero();
+      if (response) {
+        console.log("Gêneros retornados:", response.genero);
+
+        const formattedGenres = response.genero.map((g) => ({
+          id: g.id,
+          name: g.name,
+          icon: g.icon, // Confirma que cada item tem o campo 'icon'
+        }));
+
+        setGenres([{ id: 0, name: "Todos", icon: "book" }, ...formattedGenres]);
+      }
+    } catch (error) {
+      console.log("Erro ao buscar gêneros:", error);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       fetchBooks();
+      fetchGenres();
     }, [])
   );
 
-  // Função de refresh ao puxar para baixo
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchBooks();
     setRefreshing(false);
+  };
+
+  const handleSearch = (text) => {
+    setSearchTerm(text);
+    if (text) {
+      setFilteredBooks(
+        books.filter((book) =>
+          book.nome.toLowerCase().includes(text.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredBooks(books);
+    }
+  };
+
+  const handleGenreSelect = (genre) => {
+    setSelectedGenre(genre);
+    if (genre.id === 0) {
+      setFilteredBooks(books);
+    } else {
+      setFilteredBooks(
+        books.filter((book) => book.Generos.some((g) => g.name === genre.name))
+      );
+    }
   };
 
   const renderBookItem = ({ item }) => {
@@ -138,31 +150,62 @@ export default function Home() {
       <FlatList
         ListHeaderComponent={
           <>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Buscar livros..."
+              value={searchTerm}
+              onChangeText={handleSearch}
+            />
             <View>
               <BannerCarousel />
             </View>
 
             <Text style={styles.h1}>Gêneros</Text>
-            <View>
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.list}
-                data={list}
-                renderItem={({ item }) => (
-                  <TouchableOpacity style={styles.item}>
-                    {item.icon}
-                    <Text style={styles.textCategorias}>{item.category}</Text>
-                  </TouchableOpacity>
-                )}
-                keyExtractor={(item) => item.id}
-              />
-            </View>
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.list}
+              data={genres}
+              renderItem={({ item }) => {
+                console.log("Ícone recebido:", item.icon);
 
-            <Text style={styles.h1}>Livros</Text>
+                return (
+                  <TouchableOpacity
+                    style={[
+                      styles.item,
+                      selectedGenre?.id === item.id && styles.selectedGenre, // Estilo alterado para o item selecionado
+                    ]}
+                    onPress={() => handleGenreSelect(item)}
+                  >
+                    <Ionicons
+                      name={item.icon || "book"} // Ícone padrão caso não tenha
+                      size={24}
+                      color={
+                        selectedGenre?.id === item.id ? "#fff" : "#fff" // Ícone branco se selecionado, senão a cor original
+                      }
+                    />
+                    <Text style={styles.textCategorias}>{item.name}</Text>
+                  </TouchableOpacity>
+                );
+              }}
+              keyExtractor={(item) => item.id.toString()}
+            />
+
+            <View style={styles.livrosSection}>
+              <View>
+                <Text style={styles.h1}>Livros</Text>
+              </View>
+              <View>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("SearchBar")}
+                >
+                  <Text style={styles.seeMore}>Ver mais</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </>
         }
-        data={books}
+        data={filteredBooks}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderBookItem}
         refreshControl={
@@ -193,6 +236,12 @@ const styles = StyleSheet.create({
     paddingTop: "4%",
     paddingBottom: "20%",
   },
+  searchInput: {
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 8,
+    margin: 10,
+  },
   h1: {
     fontSize: 18,
     fontWeight: "500",
@@ -214,6 +263,9 @@ const styles = StyleSheet.create({
     gap: 4,
     padding: 14,
     borderRadius: 14,
+  },
+  selectedGenre: {
+    backgroundColor: "#1E1F24",
   },
   textCategorias: {
     fontSize: 12,
@@ -254,6 +306,19 @@ const styles = StyleSheet.create({
     color: "#631C11",
     fontSize: 12,
     textAlign: "center",
+  },
+  livrosSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignContent: "center",
+  },
+  seeMore: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 10,
+    marginRight: 10,
+    marginTop: 20,
+    color: "#777",
   },
   bookInfo: {
     flex: 1,

@@ -33,6 +33,8 @@ export default function Preferencies() {
 
         // Carrega os gêneros disponíveis
         const fetchedGenres = await getGenero();
+        console.log("Gêneros da API na tela de Preferências:", fetchedGenres);
+
         setGenres(fetchedGenres.genero);
 
         if (userId) {
@@ -104,9 +106,9 @@ export default function Preferencies() {
           <ChevronLeft size={24} color="#631C11" />
         </TouchableOpacity>
         <View>
-          <Text style={styles.textbold}>Editar usuário</Text>
+          <Text style={styles.textbold}>Preferências</Text>
           <Text style={styles.textspan}>
-            Edite as informações desejadas e salve quando finalizar
+            Selecione seus gêneros/categorias de livros preferidos.
           </Text>
         </View>
       </View>
