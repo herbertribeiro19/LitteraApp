@@ -64,11 +64,21 @@ export default function UserAnuncios() {
       colors={["#E4D5D2", "#F5F3F1", "#F5F3F1"]}
       style={styles.container}
     >
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeft size={24} color="#631C11" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Meus Anúncios</Text>
+      </View> */}
+
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <ChevronLeft size={24} color="#631C11" />
+        </TouchableOpacity>
+        <View>
+          <Text style={styles.textbold}>Meus anúncios</Text>
+          <Text style={styles.textspan}>Lista de anúncios criados</Text>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -115,7 +125,9 @@ export default function UserAnuncios() {
             </TouchableOpacity>
           ))
         ) : (
-          <Text style={styles.noBooksText}>Nenhum anúncio encontrado.</Text>
+          <Text style={styles.noBooksText}>
+            Você ainda não criou nenhum anúncio.
+          </Text>
         )}
       </ScrollView>
     </LinearGradient>
@@ -127,18 +139,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
+    marginTop: "24%",
     flexDirection: "row",
+    gap: 4,
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: "#F5F3F1",
+    backgroundColor: "transparent",
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#631C11",
     marginLeft: 10,
+  },
+  textbold: {
+    color: "#631C11",
+    fontSize: 26,
+    fontWeight: "600",
+  },
+  textspan: {
+    color: "#631C11",
+    marginTop: "1%",
+    fontSize: 12,
+    fontWeight: "300",
   },
   content: {
     paddingHorizontal: 20,

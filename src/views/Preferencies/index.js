@@ -11,6 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { getGenero } from "../../services/api/genero";
+import { ChevronLeft } from "lucide-react-native";
 import {
   preferenciesUser,
   getUserPreferences,
@@ -86,7 +87,7 @@ export default function Preferencies() {
         hasSelectedPreferences
       );
 
-      Alert.alert("Sucesso", "Preferências salvas com sucesso!");
+      // Alert.alert("Sucesso", "Preferências salvas com sucesso!");
       navigation.navigate("HomeTabs"); // Redirecionar para a Home
     } catch (error) {
       Alert.alert("Erro", "Não foi possível salvar as preferências.");
@@ -98,11 +99,16 @@ export default function Preferencies() {
       colors={["#E4D5D2", "#F5F3F1", "#F5F3F1"]}
       style={styles.container}
     >
-      <View style={styles.boxmain}>
-        <Text style={styles.textbold}>Preferências</Text>
-        <Text style={styles.textspan}>
-          Selecione os seus gêneros de livros preferidos na lista
-        </Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <ChevronLeft size={24} color="#631C11" />
+        </TouchableOpacity>
+        <View>
+          <Text style={styles.textbold}>Editar usuário</Text>
+          <Text style={styles.textspan}>
+            Edite as informações desejadas e salve quando finalizar
+          </Text>
+        </View>
       </View>
       <View style={styles.boxList}>
         <FlatList
@@ -158,13 +164,14 @@ const styles = StyleSheet.create({
   //     backgroundColor: "#F5F3F1",
   //     flexDirection: "column",
   //   },
-  boxmain: {
+  header: {
     marginTop: "24%",
-    marginHorizontal: "6%",
-    justifyContent: "left",
-    flexDirection: "column",
-    alignSelf: "left",
-    gap: "4%",
+    flexDirection: "row",
+    gap: 4,
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: "transparent",
   },
   boxList: {
     marginHorizontal: "3%",

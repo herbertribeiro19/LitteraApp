@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getUser } from "../../services/api/users";
 import { editUser } from "../../services/api/users";
-import { Eye, EyeOff } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 
 export default function EditUser() {
   const navigation = useNavigation();
@@ -68,11 +68,16 @@ export default function EditUser() {
       colors={["#E4D5D2", "#F5F3F1", "#F5F3F1"]}
       style={styles.container}
     >
-      <View style={styles.boxmain}>
-        <Text style={styles.textbold}>Editar usuário</Text>
-        <Text style={styles.textspan}>
-          Edite as informações desejadas e salve quando finalizar
-        </Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <ChevronLeft size={24} color="#631C11" />
+        </TouchableOpacity>
+        <View>
+          <Text style={styles.textbold}>Editar usuário</Text>
+          <Text style={styles.textspan}>
+            Edite as informações desejadas e salve quando finalizar
+          </Text>
+        </View>
       </View>
       <View style={styles.boxLogin}>
         <TextInput
@@ -135,14 +140,14 @@ const styles = StyleSheet.create({
   //     backgroundColor: "#F5F3F1",
   //     flexDirection: "column",
   //   },
-  boxmain: {
+  header: {
     marginTop: "24%",
-    marginBottom: "10%",
-    marginHorizontal: "8%",
-    justifyContent: "left",
-    flexDirection: "column",
-    alignSelf: "left",
-    gap: "10%",
+    flexDirection: "row",
+    gap: 4,
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: "transparent",
   },
   textbold: {
     color: "#631C11",
