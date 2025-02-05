@@ -64,13 +64,6 @@ export default function UserAnuncios() {
       colors={["#E4D5D2", "#F5F3F1", "#F5F3F1"]}
       style={styles.container}
     >
-      {/* <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ChevronLeft size={24} color="#631C11" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Meus Anúncios</Text>
-      </View> */}
-
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ChevronLeft size={24} color="#631C11" />
@@ -146,12 +139,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: "transparent",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#631C11",
-    marginLeft: 10,
   },
   textbold: {
     color: "#631C11",

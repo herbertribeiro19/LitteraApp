@@ -25,6 +25,7 @@ import Profile from "./src/views/Profile";
 import Events from "./src/views/Events";
 import SearchBar from "./src/views/SearchBar";
 import UserAnuncios from "./src/views/UserAnuncios";
+import LitterAI from "./src/views/LitterAI";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -200,6 +201,7 @@ export default function App() {
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Events" component={Events} />
         <Stack.Screen name="SearchBar" component={SearchBar} />
+        <Stack.Screen name="LitterAI" component={LitterAI} />
         {/* Alterado para HomeTabs */}
         <Stack.Screen name="HomeTabs" component={BottomTabs} />
       </Stack.Navigator>

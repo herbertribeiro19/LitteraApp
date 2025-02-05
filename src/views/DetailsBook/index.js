@@ -388,6 +388,6 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 20,
     right: 20,
-    zIndex: 2, // Garante que o botão fique acima de todo o conteúdo
+    zIndex: 2,
   },
 });

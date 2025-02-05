@@ -50,8 +50,6 @@ export default function Home() {
     try {
       const response = await getGenero();
       if (response) {
-        console.log("Gêneros retornados:", response.genero);
-
         const formattedGenres = response.genero.map((g) => ({
           id: g.id,
           name: g.name,
@@ -167,8 +165,6 @@ export default function Home() {
               style={styles.list}
               data={genres}
               renderItem={({ item }) => {
-                console.log("Ícone recebido:", item.icon);
-
                 return (
                   <TouchableOpacity
                     style={[
@@ -290,7 +286,7 @@ const styles = StyleSheet.create({
   bookImage: {
     width: 80,
     height: 120,
-    borderRadius: 4,
+    borderRadius: 12,
     marginRight: 15,
   },
   bookImagePlaceholder: {

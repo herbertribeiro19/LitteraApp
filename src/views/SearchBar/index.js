@@ -15,7 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { getBook } from "../../services/api/book";
 import { getGenero } from "../../services/api/genero";
 import { LinearGradient } from "expo-linear-gradient";
-import { Search, Filter } from "lucide-react-native";
+import { Search, Filter, MagnetIcon, Sparkles } from "lucide-react-native";
 
 export default function SearchBar() {
   const navigation = useNavigation();
@@ -28,6 +28,7 @@ export default function SearchBar() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
+  const IA = require("../../assets/IA.png");
   const transactions = ["Venda", "Troca", "Doação"];
 
   useEffect(() => {
@@ -40,8 +41,9 @@ export default function SearchBar() {
     try {
       const response = await getBook();
       if (response.books) {
-        setBooks(response.books);
-        setFilteredBooks(response.books);
+        const sortedBooks = response.books.sort((a, b) => b.id - a.id);
+        setBooks(sortedBooks);
+        setFilteredBooks(sortedBooks);
       }
     } catch (error) {
       console.log("Erro ao buscar livros:", error);
@@ -124,7 +126,7 @@ export default function SearchBar() {
       </View>
 
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={isFilterModalVisible}
         onRequestClose={() => setIsFilterModalVisible(false)}
@@ -219,6 +221,16 @@ export default function SearchBar() {
           }
         />
       )}
+      <View style={styles.fixedButtonContainer}>
+        <TouchableOpacity
+          style={styles.iaContent}
+          onPress={() => navigation.navigate("LitterAI")}
+        >
+          <Image style={styles.imageIA} source={IA} />
+          <Text style={styles.litteraAiText}>Acesse o LitterAI</Text>
+          <Sparkles size={16} color="#631C11" style={styles.iconIA} />
+        </TouchableOpacity>
+      </View>
     </LinearGradient>
   );
 }
@@ -255,6 +267,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
+
   modalContent: {
     backgroundColor: "#F5F3F1",
     padding: 20,
@@ -296,7 +309,7 @@ const styles = StyleSheet.create({
   bookItem: {
     flex: 1,
     margin: 5,
-    backgroundColor: "#F5F3F1",
+    backgroundColor: "#f9f9f9",
     borderRadius: 8,
     padding: 10,
     alignItems: "center",
@@ -304,7 +317,7 @@ const styles = StyleSheet.create({
   bookImage: {
     width: "100%",
     height: 200,
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 8,
   },
   bookImagePlaceholder: {
@@ -346,5 +359,40 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
     color: "#631C11",
+  },
+  fixedButtonContainer: {
+    backgroundColor: "transparent",
+    position: "absolute",
+    bottom: 0,
+    right: 10,
+    zIndex: 2,
+  },
+  iaContent: {
+    gap: 0,
+    marginBottom: 10,
+    flexDirection: "row-reverse",
+    backgroundColor: "#E4D5D2",
+    borderRadius: 14,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    width: 204,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  litteraAiText: {
+    fontSize: 12,
+    marginRight: 8,
+    color: "#631C11",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 2,
+  },
+  imageIA: {
+    width: 50,
+    height: 50,
+    borderRadius: 12,
+  },
+  iconIA: {
+    marginLeft: 8,
   },
 });
