@@ -4,7 +4,13 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons"; // Para ícones
-import { House, CirclePlus } from "lucide-react-native";
+import {
+  House,
+  CirclePlus,
+  UserRound,
+  Ticket,
+  Search,
+} from "lucide-react-native";
 
 import Welcome from "./src/views/Welcome";
 import Login from "./src/views/Login";
@@ -15,6 +21,10 @@ import DetailsBook from "./src/views/DetailsBook";
 import EditUser from "./src/views/EditUser";
 import Preferencies from "./src/views/Preferencies";
 import BookDetails from "./src/views/DetailsBook";
+import Profile from "./src/views/Profile";
+import Events from "./src/views/Events";
+import SearchBar from "./src/views/SearchBar";
+import UserAnuncios from "./src/views/UserAnuncios";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -53,6 +63,23 @@ const BottomTabs = () => {
           },
         }}
       />
+      <Tab.Screen
+        name="SearchBar"
+        component={SearchBar}
+        options={{
+          tabBarIcon: ({ focused, color, size }) => (
+            <Search
+              size={26}
+              color={focused ? "#fff" : "#B6B6B6"} // Cor do ícone quando está selecionado (focused) ou desabilitado
+            />
+          ),
+          tabBarLabel: () => null,
+          tabBarIconStyle: {
+            alignSelf: "center",
+            marginTop: 10,
+          },
+        }}
+      />
 
       <Tab.Screen
         name="Create"
@@ -60,6 +87,40 @@ const BottomTabs = () => {
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <CirclePlus
+              size={26}
+              color={focused ? "#fff" : "#B6B6B6"} // Cor do ícone quando está selecionado (focused) ou desabilitado
+            />
+          ),
+          tabBarLabel: () => null,
+          tabBarIconStyle: {
+            alignSelf: "center",
+            marginTop: 10,
+          },
+        }}
+      />
+      <Tab.Screen
+        name="Events"
+        component={Events}
+        options={{
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ticket
+              size={26}
+              color={focused ? "#fff" : "#B6B6B6"} // Cor do ícone quando está selecionado (focused) ou desabilitado
+            />
+          ),
+          tabBarLabel: () => null,
+          tabBarIconStyle: {
+            alignSelf: "center",
+            marginTop: 10,
+          },
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          tabBarIcon: ({ focused, color, size }) => (
+            <UserRound
               size={26}
               color={focused ? "#fff" : "#B6B6B6"} // Cor do ícone quando está selecionado (focused) ou desabilitado
             />
@@ -135,6 +196,10 @@ export default function App() {
         <Stack.Screen name="EditUser" component={EditUser} />
         <Stack.Screen name="Preferencies" component={Preferencies} />
         <Stack.Screen name="BookDetails" component={BookDetails} />
+        <Stack.Screen name="UserAnuncios" component={UserAnuncios} />
+        <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen name="Events" component={Events} />
+        <Stack.Screen name="SearchBar" component={SearchBar} />
         {/* Alterado para HomeTabs */}
         <Stack.Screen name="HomeTabs" component={BottomTabs} />
       </Stack.Navigator>
