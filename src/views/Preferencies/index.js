@@ -27,18 +27,13 @@ export default function Preferencies() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Recupera o userId armazenado
         const userId = await AsyncStorage.getItem("userId");
         setUserId(userId);
-
-        // Carrega os gêneros disponíveis
         const fetchedGenres = await getGenero();
-        console.log("Gêneros da API na tela de Preferências:", fetchedGenres);
 
         setGenres(fetchedGenres.genero);
 
         if (userId) {
-          // Obtém as preferências salvas para o usuário
           const userPreferences = await getUserPreferences(userId);
           const savedGenres = userPreferences.map((pref) => pref.GeneroId);
           setSelectedGenres(savedGenres); // Marcar os gêneros salvos como selecionados
@@ -66,15 +61,12 @@ export default function Preferencies() {
     }
 
     try {
-      // Obter o ID do usuário logado
       const userId = await AsyncStorage.getItem("userId");
 
       if (!userId) {
         console.log("Erro: Nenhum usuário logado.");
         return;
       }
-
-      // Salvar as preferências do usuário
       await preferenciesUser(selectedGenres);
 
       // Atualizar o AsyncStorage para indicar que ESSE usuário já passou pela tela de preferências
@@ -89,8 +81,7 @@ export default function Preferencies() {
         hasSelectedPreferences
       );
 
-      // Alert.alert("Sucesso", "Preferências salvas com sucesso!");
-      navigation.navigate("HomeTabs"); // Redirecionar para a Home
+      navigation.navigate("HomeTabs");
     } catch (error) {
       Alert.alert("Erro", "Não foi possível salvar as preferências.");
     }
@@ -153,7 +144,7 @@ export default function Preferencies() {
           style={styles.btncancel}
           onPress={() => navigation.navigate("HomeTabs")}
         >
-          <Text style={styles.textbtncancel}>Cancelar</Text>
+          <Text style={styles.textbtncancel}>Pular</Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>

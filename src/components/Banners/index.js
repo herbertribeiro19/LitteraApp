@@ -14,7 +14,7 @@ const BannerCarousel = () => {
         autoplay={true}
         loop={true}
         dotColor="red"
-        autoplayTimeout={4}
+        autoplayTimeout={6}
         activeDotColor="#F5F3F1"
       >
         {banners.map((banner) => (

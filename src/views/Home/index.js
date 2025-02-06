@@ -106,7 +106,7 @@ export default function Home() {
     return (
       <TouchableOpacity
         style={styles.bookItem}
-        onPress={() => navigation.navigate("BookDetails", { book: item })}
+        onPress={() => navigation.navigate("DetailsBook", { book: item })}
       >
         {hasImage ? (
           <Image source={{ uri: item.imagens }} style={styles.bookImage} />
@@ -117,9 +117,8 @@ export default function Home() {
         )}
         <View style={styles.bookInfo}>
           <Text style={styles.bookTitle}>{item.nome}</Text>
-          <Text style={styles.bookDetailBold}>{item.StatusBook.name}</Text>
           <Text style={styles.bookDetail}>
-            Disponível para{" "}
+            {item.StatusBook.name} | Disponível para{" "}
             <Text style={styles.bookDetailBold}>
               {item.TypeTransaction.name}
             </Text>
@@ -130,6 +129,7 @@ export default function Home() {
               {item.Generos.map((genero) => genero.name).join(", ")}
             </Text>
           </Text>
+          <Text style={styles.bookDetail}>{item.cidade}</Text>
           {item.value && (
             <Text style={styles.bookValue}>R$ {item.value},00</Text>
           )}
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bookTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     color: "#631C11",
     marginBottom: 5,

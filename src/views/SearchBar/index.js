@@ -193,7 +193,7 @@ export default function SearchBar() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.bookItem}
-              onPress={() => navigation.navigate("BookDetails", { book: item })}
+              onPress={() => navigation.navigate("DetailsBook", { book: item })}
             >
               {item.imagens ? (
                 <Image

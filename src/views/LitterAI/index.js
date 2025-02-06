@@ -23,9 +23,10 @@ export default function LitterAI() {
 
   const logo = require("../../assets/logo_red2.png");
 
+  const logo2 = require("../../assets/IA.png");
+
   const handleSubmit = async () => {
     setLoading(true);
-    setError("");
     try {
       const data = await PostIA();
       console.log("Dados recebidos da API:", data);
@@ -51,8 +52,8 @@ export default function LitterAI() {
       </View>
       <ScrollView contentContainerStyle={styles.container}>
         {/* Esconde a logo quando já tiver dados */}
-        {!responseData && <Image style={styles.image} source={logo} />}
-        <Text style={styles.header2}>Bem-vindo ao LitterAI!</Text>
+        {!responseData && <Image style={styles.image} source={logo2} />}
+        <Text style={styles.header2}>Bem-vindo(a) ao LitterAI!</Text>
         <Text style={styles.subHeader}>
           Ao clicar no botão abaixo, você receberá recomendações de livros
           baseadas nas suas preferências.
@@ -61,11 +62,11 @@ export default function LitterAI() {
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         {/* Troca o texto do botão dependendo se há ou não dados */}
-        <Button
-          title={responseData ? "Buscar novas recomendações" : "Buscar Livros"}
-          onPress={handleSubmit}
-          color="#631C11"
-        />
+        <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
+          <Text style={styles.btnText}>
+            {responseData ? "Buscar novas recomendações" : "Buscar Livros"}
+          </Text>
+        </TouchableOpacity>
 
         {loading && (
           <View>
@@ -80,19 +81,15 @@ export default function LitterAI() {
           </View>
         )}
 
-        {responseData &&
-        Array.isArray(responseData) &&
-        responseData.length > 0 ? (
+        {responseData?.recomendacoes &&
+        Array.isArray(responseData.recomendacoes) &&
+        responseData.recomendacoes.length > 0 ? (
           <View style={styles.responseContainer}>
             <Text style={styles.responseTitle}>Recomendações de Livros</Text>
 
-            {responseData.map((book, index) => (
+            {responseData.recomendacoes.map((book, index) => (
               <View key={index} style={styles.bookCard}>
-                {/* Exibe a logo para todos os itens da lista */}
-                <Image
-                  source={logo} // Sempre usa a logo, pois não há imagem na API
-                  style={styles.bookImage}
-                />
+                <Image source={logo2} style={styles.bookImage} />
                 <View style={styles.bookInfo}>
                   <Text style={styles.bookTitle}>{book.titulo}</Text>
                   <Text style={styles.bookDescription}>{book.descricao}</Text>
@@ -100,7 +97,7 @@ export default function LitterAI() {
               </View>
             ))}
           </View>
-        ) : responseData && responseData.length === 0 ? (
+        ) : responseData && responseData.recomendacoes?.length === 0 ? (
           <Text style={styles.noDataText}>Nenhum livro encontrado.</Text>
         ) : null}
       </ScrollView>
@@ -139,7 +136,7 @@ const styles = StyleSheet.create({
   image: {
     width: 100,
     height: 100,
-    borderRadius: 60,
+    borderRadius: 20,
     marginBottom: 20,
   },
   header2: {
@@ -153,6 +150,19 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 20,
     textAlign: "center",
+  },
+  btn: {
+    width: "90%",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#631C11",
+    padding: 12,
+  },
+  btnText: {
+    color: "#631C11",
+    fontSize: 16,
+    textAlign: "center",
+    fontWeight: "600",
   },
   errorText: {
     color: "red",

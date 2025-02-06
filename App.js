@@ -3,7 +3,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons"; // Para ícones
 import {
   House,
   CirclePlus,
@@ -17,15 +16,18 @@ import Login from "./src/views/Login";
 import Register from "./src/views/Register";
 import Home from "./src/views/Home";
 import CreateBook from "./src/views/CreateBook";
-import DetailsBook from "./src/views/DetailsBook";
 import EditUser from "./src/views/EditUser";
 import Preferencies from "./src/views/Preferencies";
-import BookDetails from "./src/views/DetailsBook";
+import DetailsBook from "./src/views/DetailsBook";
 import Profile from "./src/views/Profile";
 import Events from "./src/views/Events";
 import SearchBar from "./src/views/SearchBar";
 import UserAnuncios from "./src/views/UserAnuncios";
 import LitterAI from "./src/views/LitterAI";
+import Notification from "./src/views/Notification";
+import InteressadoDetails from "./src/views/InteressadoDetails";
+import EditBook from "./src/views/EditBook";
+import MeusInteresses from "./src/views/MeusInteresses";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -196,12 +198,19 @@ export default function App() {
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="EditUser" component={EditUser} />
         <Stack.Screen name="Preferencies" component={Preferencies} />
-        <Stack.Screen name="BookDetails" component={BookDetails} />
+        <Stack.Screen name="DetailsBook" component={DetailsBook} />
         <Stack.Screen name="UserAnuncios" component={UserAnuncios} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Events" component={Events} />
         <Stack.Screen name="SearchBar" component={SearchBar} />
         <Stack.Screen name="LitterAI" component={LitterAI} />
+        <Stack.Screen name="Notification" component={Notification} />
+        <Stack.Screen name="EditBook" component={EditBook} />
+        <Stack.Screen name="MeusInteresses" component={MeusInteresses} />
+        <Stack.Screen
+          name="InteressadoDetails"
+          component={InteressadoDetails}
+        />
         {/* Alterado para HomeTabs */}
         <Stack.Screen name="HomeTabs" component={BottomTabs} />
       </Stack.Navigator>

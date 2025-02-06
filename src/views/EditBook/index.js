@@ -9,38 +9,46 @@ import {
   ScrollView,
   Modal,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MultiSelect } from "react-native-element-dropdown";
 import { Dropdown } from "react-native-element-dropdown";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { LibraryBig } from "lucide-react-native";
+import { LibraryBig, ChevronLeft } from "lucide-react-native";
 import { getGenero } from "../../services/api/genero";
 import { getStatusBook } from "../../services/api/statusbook";
 import { getTransactions } from "../../services/api/transactions.js";
-import { createBook } from "../../services/api/book.js";
+import { getBookId, updateBookId } from "../../services/api/book.js";
 import { createImage } from "../../services/api/createImage.js";
 import * as ImagePicker from "expo-image-picker";
-import { Image } from "react-native";
 
-export default function CreateBook() {
+export default function EditBook() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { book } = route.params;
 
   const [images, setImages] = useState([]); // Lista de imagens URI
   const [imagesBase64, setImagesBase64] = useState([]); // Lista de imagens Base64
-
-  const [nome, setNome] = useState("");
-  const [description, setDescription] = useState("");
-  const [cidade, setCidade] = useState("");
+  const [removedImages, setRemovedImages] = useState([]); // Lista de imagens removidas
+  const [nome, setNome] = useState(book.nome);
+  const [description, setDescription] = useState(book.description);
+  const [cidade, setCidade] = useState(book.cidade);
   const [generos, setGeneros] = useState([]);
-  const [generoIds, setGeneroIds] = useState([]);
+  const [generoIds, setGeneroIds] = useState(
+    book.Generos?.map((g) => g.id.toString()) || [] // Verifique se book.Generos existe
+  );
   const [statusBooks, setStatusBooks] = useState([]);
-  const [statusBookId, setStatusBookId] = useState("");
+  const [statusBookId, setStatusBookId] = useState(
+    book.StatusBookId?.toString() || ""
+  );
   const [transactions, setTransactions] = useState([]);
-  const [transactionId, setTransactionId] = useState("");
-  const [value, setValue] = useState("");
+  const [transactionId, setTransactionId] = useState(
+    book.TypeTransactionId?.toString() || ""
+  );
+  const [value, setValue] = useState(book.value ? book.value.toString() : "");
   const [isFocusGeneros, setIsFocusGeneros] = useState(false);
   const [isFocusStatusBook, setIsFocusStatusBook] = useState(false);
   const [isFocusTransaction, setIsFocusTransaction] = useState(false);
@@ -53,53 +61,6 @@ export default function CreateBook() {
       setHasCameraPermission(status === "granted");
     })();
   }, []);
-
-  const pickImage = async (fromCamera = false) => {
-    if (fromCamera && hasCameraPermission === false) {
-      Alert.alert(
-        "Permissão Negada",
-        "Conceda acesso à câmera nas configurações."
-      );
-      return;
-    }
-
-    let result;
-    if (fromCamera) {
-      result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-        base64: true,
-      });
-    } else {
-      result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-        base64: true,
-        allowsMultipleSelection: true, // Permite múltiplas imagens
-      });
-    }
-
-    if (!result.canceled) {
-      const newImages = result.assets.map((asset) => asset.uri);
-      const newImagesBase64 = result.assets.map((asset) => asset.base64);
-
-      setImages((prev) => [...prev, ...newImages]);
-      setImagesBase64((prev) => [...prev, ...newImagesBase64]);
-    }
-  };
-
-  // Função para remover uma imagem
-  const removeImage = (index) => {
-    const newImages = images.filter((_, i) => i !== index);
-    const newImagesBase64 = imagesBase64.filter((_, i) => i !== index);
-
-    setImages(newImages);
-    setImagesBase64(newImagesBase64);
-  };
 
   useEffect(() => {
     const fetchGeneros = async () => {
@@ -149,7 +110,73 @@ export default function CreateBook() {
     fetchTransactions();
   }, []);
 
-  const handleCreateBook = async () => {
+  useEffect(() => {
+    // Carregar as imagens associadas ao livro
+    const fetchBookData = async () => {
+      try {
+        const bookData = await getBookId(book.id);
+        // Verifica se a resposta da API contém o campo 'imagens' e carrega no estado
+        if (bookData?.book?.imagens) {
+          setImages(bookData.book.imagens); // Carregar as imagens associadas ao livro
+        }
+      } catch (error) {
+        Alert.alert("Erro", "Não foi possível carregar as imagens do livro.");
+      }
+    };
+
+    fetchBookData();
+  }, [book.id]);
+
+  const pickImage = async (fromCamera = false) => {
+    if (fromCamera && hasCameraPermission === false) {
+      Alert.alert(
+        "Permissão Negada",
+        "Conceda acesso à câmera nas configurações."
+      );
+      return;
+    }
+
+    let result;
+    if (fromCamera) {
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        base64: true,
+      });
+    } else {
+      result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        base64: true,
+        allowsMultipleSelection: true, // Permite múltiplas imagens
+      });
+    }
+
+    if (!result.canceled) {
+      const newImages = result.assets.map((asset) => asset.uri);
+      const newImagesBase64 = result.assets.map((asset) => asset.base64);
+
+      setImages((prev) => [...prev, ...newImages]);
+      setImagesBase64((prev) => [...prev, ...newImagesBase64]);
+    }
+  };
+
+  const removeImage = (index) => {
+    const imageToRemove = images[index]; // Identificar qual imagem foi removida
+    setRemovedImages((prev) => [...prev, imageToRemove]); // Adiciona a imagem removida na lista de removidas
+
+    const newImages = images.filter((_, i) => i !== index);
+    const newImagesBase64 = imagesBase64.filter((_, i) => i !== index);
+
+    setImages(newImages);
+    setImagesBase64(newImagesBase64);
+  };
+
+  const handleUpdateBook = async () => {
     if (!nome || !generoIds.length || !statusBookId || !transactionId) {
       Alert.alert("Erro", "Preencha todos os campos obrigatórios!");
       return;
@@ -159,7 +186,7 @@ export default function CreateBook() {
 
     const formattedValor = value !== "" ? Number(value) : null;
 
-    const newBook = {
+    const updatedBook = {
       nome,
       description,
       TypeTransactionId: Number(transactionId),
@@ -173,43 +200,39 @@ export default function CreateBook() {
       const token = await AsyncStorage.getItem("token");
       if (!token) throw new Error("Token não encontrado");
 
-      const bookResponse = await createBook(newBook);
-      const bookId = bookResponse?.book?.id;
+      // Atualizar o livro sem as imagens removidas
+      await updateBookId(book.id, updatedBook);
 
-      if (!bookId || typeof bookId !== "number") {
-        throw new Error("Erro ao obter o ID do livro.");
+      // Enviar as imagens removidas para a API para excluí-las
+      if (removedImages.length > 0) {
+        // Se necessário, enviar um endpoint para deletar imagens no servidor
+        console.log("Imagens removidas", removedImages);
+        // Excluir imagens removidas no servidor se necessário (depende da API)
       }
 
+      // Enviar as imagens novas
       if (imagesBase64.length > 0) {
         const newImagePayload = {
           imagens: imagesBase64.map((base64, index) => ({
             fileName: `imagem_${index + 1}.jpg`,
             fileContent: base64,
             fileType: "image/jpeg",
-            BookId: bookId,
+            BookId: book.id,
           })),
         };
 
         await createImage(newImagePayload);
       }
 
-      // Resetar os campos
-      setNome("");
-      setDescription("");
-      setGeneroIds([]);
-      setStatusBookId("");
-      setTransactionId("");
-      setCidade("");
-      setValue(null);
-      setImages([]);
-      setImagesBase64([]);
-
       setIsLoading(false); // Desativa o loading
 
-      navigation.navigate("Home"); // Redireciona para a Home principal
+      navigation.navigate("DetailsBook", { book: { ...book, ...updatedBook } }); // Redireciona para a página de detalhes com os dados atualizados
     } catch (error) {
       setIsLoading(false); // Desativa o loading em caso de erro
-      Alert.alert("Erro", `Não foi possível criar o livro: ${error.message}`);
+      Alert.alert(
+        "Erro",
+        `Não foi possível atualizar o livro: ${error.message}`
+      );
     }
   };
 
@@ -218,11 +241,16 @@ export default function CreateBook() {
       colors={["#E4D5D2", "#F5F3F1", "#F5F3F1"]}
       style={styles.container}
     >
-      <View style={styles.boxmain}>
-        <Text style={styles.textbold}>Criar Anúncio</Text>
-        <Text style={styles.textspan}>
-          Preencha as informações do livro que deseja vender, trocar ou doar.
-        </Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <ChevronLeft size={24} color="#631C11" />
+        </TouchableOpacity>
+        <View>
+          <Text style={styles.textbold}>Editar anúncio</Text>
+          <Text style={styles.textspan}>
+            Edite as informações do anúncio e salve quando finalizar
+          </Text>
+        </View>
       </View>
       <ScrollView
         contentContainerStyle={[styles.boxListForm, { flexGrow: 1 }]}
@@ -247,7 +275,6 @@ export default function CreateBook() {
           ))}
         </ScrollView>
 
-        {/* Botões para adicionar imagens */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.iconButton}
@@ -290,7 +317,6 @@ export default function CreateBook() {
           placeholder="Está em qual cidade?"
         />
 
-        {/* Dropdown para seleção de Gênero */}
         <MultiSelect
           style={[
             styles.dropdown,
@@ -326,7 +352,6 @@ export default function CreateBook() {
           )}
         />
 
-        {/* Dropdown para seleção de Status do Livro */}
         <Dropdown
           style={styles.dropdown}
           placeholderStyle={styles.placeholderStyle}
@@ -352,7 +377,6 @@ export default function CreateBook() {
           )}
         />
 
-        {/* Dropdown para seleção de Tipo de Transação */}
         <Dropdown
           style={styles.dropdown}
           placeholderStyle={styles.placeholderStyle}
@@ -378,23 +402,21 @@ export default function CreateBook() {
           )}
         />
 
-        {/* Exibir campo de valor apenas para 'Troca' ou 'Venda' */}
         {(transactionId === "1" || transactionId === "2") && (
           <TextInput
             style={styles.input}
             value={value}
             onChangeText={(text) => {
-              // Permite apenas números
-              const numericValue = text.replace(/[^0-9]/g, ""); // Remove tudo que não for número
-              setValue(numericValue); // Atualiza o valor apenas com números
+              const numericValue = text.replace(/[^0-9]/g, "");
+              setValue(numericValue);
             }}
             placeholder="Valor do livro"
             keyboardType="numeric"
           />
         )}
         <View style={styles.content}>
-          <TouchableOpacity style={styles.btnSave} onPress={handleCreateBook}>
-            <Text style={styles.textbtnSave}>Criar Anúncio</Text>
+          <TouchableOpacity style={styles.btnSave} onPress={handleUpdateBook}>
+            <Text style={styles.textbtnSave}>Salvar Alterações</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.btnCancel}
@@ -405,12 +427,11 @@ export default function CreateBook() {
         </View>
       </ScrollView>
 
-      {/* Modal de Loading */}
       <Modal transparent={true} visible={isLoading}>
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <ActivityIndicator size="large" color="#631C11" />
-            <Text style={styles.modalText}>Criando anúncio...</Text>
+            <Text style={styles.modalText}>Atualizando anúncio...</Text>
           </View>
         </View>
       </Modal>
@@ -419,9 +440,26 @@ export default function CreateBook() {
 }
 
 const styles = StyleSheet.create({
-  // container: {
-  //   gap: "6%",
-  // },
+  header: {
+    marginTop: "24%",
+    flexDirection: "row",
+    gap: 4,
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: "transparent",
+  },
+  textbold: {
+    color: "#631C11",
+    fontSize: 26,
+    fontWeight: "600",
+  },
+  textspan: {
+    color: "#631C11",
+    marginTop: "1%",
+    fontSize: 12,
+    fontWeight: "300",
+  },
   boxmain: { marginTop: "24%", marginBottom: "4%", marginHorizontal: "8%" },
   textbold: { color: "#631C11", fontSize: 26, fontWeight: "600" },
   textspan: {
@@ -457,7 +495,6 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     alignItems: "center",
-    // backgroundColor: "#F5F3F1",
     padding: 8,
     borderRadius: 10,
     width: "45%",
@@ -473,16 +510,6 @@ const styles = StyleSheet.create({
     marginHorizontal: "7%",
     paddingBottom: "50%",
   },
-  uploadButton: {
-    backgroundColor: "#631C11",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 5,
-  },
-  uploadButtonText: {
-    color: "white",
-    fontSize: 16,
-  },
   input: {
     width: "100%",
     borderBottomWidth: 2,
@@ -493,7 +520,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#631C11",
   },
-
   dropdown: {
     borderBottomWidth: 2,
     borderBottomColor: "#631C11",

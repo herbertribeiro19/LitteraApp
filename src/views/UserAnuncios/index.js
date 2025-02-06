@@ -80,7 +80,7 @@ export default function UserAnuncios() {
             <TouchableOpacity
               key={book.id}
               style={styles.bookCard}
-              onPress={() => navigation.navigate("BookDetails", { book })}
+              onPress={() => navigation.navigate("DetailsBook", { book })}
             >
               <View style={styles.bookInfo}>
                 <Text style={styles.bookTitle}>{book.nome}</Text>

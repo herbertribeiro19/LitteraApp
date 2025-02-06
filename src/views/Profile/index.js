@@ -15,13 +15,13 @@ import {
   LogOut,
   ChevronRight,
   KeyIcon,
+  MessageCircleHeart,
 } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Profile() {
   const navigation = useNavigation();
-
   const handleLogout = async () => {
     try {
       // Buscar o userId antes de limpar os dados
@@ -71,6 +71,11 @@ export default function Profile() {
       icon: <Settings size={24} color="#631C11" />,
       title: "Atualizar Preferências",
       onPress: () => navigation.navigate("Preferencies"),
+    },
+    {
+      icon: <MessageCircleHeart size={24} color="#631C11" />,
+      title: "Meus Interesses",
+      onPress: () => navigation.navigate("MeusInteresses"),
     },
     {
       icon: <BookOpen size={24} color="#631C11" />,

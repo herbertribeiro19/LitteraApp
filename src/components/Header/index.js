@@ -9,47 +9,41 @@ import {
   Image,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { getUser } from "../../services/api/users";
-import { UserRoundPen, LogOut, LibraryBig } from "lucide-react-native";
+import { UserRoundPen, LogOut, LibraryBig, Bell } from "lucide-react-native";
+import { getNotification } from "../../services/api/notification";
 
 export default function Header() {
   const navigation = useNavigation();
   const [userName, setUserName] = useState("");
-  const [modalVisible, setModalVisible] = useState(false); // Estado para abrir/fechar o modal
-  const logoMale = require("../../assets/iconuserM.png"); // Ícone masculino
-  const logoFemale = require("../../assets/iconuserF.png"); // Ícone feminino
-  const logoSemGenero = require("../../assets/iconuserS.png"); // Ícone sem genero
+  const [modalVisible, setModalVisible] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const logoMale = require("../../assets/iconuserM.png");
+  const logoFemale = require("../../assets/iconuserF.png");
 
   useFocusEffect(
     React.useCallback(() => {
       fetchUser();
+      fetchNotifications();
     }, [])
   );
 
   const isFemale = (name) => {
-    // Função para verificar se o nome termina com "a", caso contrário, assume masculino
     return name.toLowerCase().endsWith("a");
   };
 
   const handleLogout = async () => {
     try {
-      // Buscar o userId antes de limpar os dados
       const userId = await AsyncStorage.getItem("userId");
-
       if (!userId) {
         console.log("Erro: Nenhum usuário logado.");
         return;
       }
-
-      // Remover apenas os dados de login
       await AsyncStorage.removeItem("isLoggedIn");
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("userId");
-
-      // Redirecionar para a tela de Login
       requestAnimationFrame(() => {
         navigation.reset({
           index: 0,
@@ -89,8 +83,6 @@ export default function Header() {
       if (!token) throw new Error("Token não encontrado");
 
       const userData = await getUser(token);
-      console.log("Resposta do getUser:", userData);
-
       if (userData?.user?.name) {
         const firstName = userData.user.name.split(" ")[0];
         setUserName(firstName);
@@ -100,6 +92,20 @@ export default function Header() {
     } catch (error) {
       console.log("Erro ao buscar usuário:", error);
     }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const notifications = await getNotification();
+      setNotificationCount(notifications.notifications.length); // Atualiza o contador
+    } catch (error) {
+      console.log("Erro ao buscar notificações:", error);
+    }
+  };
+
+  const handleNotificationPress = () => {
+    setNotificationCount(0); // Zera o contador
+    navigation.navigate("Notification"); // Navega para a página de notificações
   };
 
   return (
@@ -116,6 +122,19 @@ export default function Header() {
       <Text style={styles.name}>
         Olá, <Text style={styles.nameuser}>{userName || "Usuário"}</Text>
       </Text>
+
+      {/* Ícone de Notificações */}
+      <TouchableOpacity
+        style={styles.notificationIcon}
+        onPress={handleNotificationPress}
+      >
+        <Bell size={24} color="#631C11" />
+        {notificationCount > 0 && (
+          <View style={styles.notificationBadge}>
+            <Text style={styles.notificationText}>{notificationCount}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
 
       {/* MODAL DE OPÇÕES */}
       <Modal
@@ -171,7 +190,6 @@ const styles = StyleSheet.create({
     gap: 8,
     alignItems: "center",
     padding: 12,
-
     flexDirection: "row",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
@@ -221,5 +239,25 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 16,
     color: "#631C11",
+  },
+  notificationIcon: {
+    marginLeft: "auto",
+    position: "relative",
+  },
+  notificationBadge: {
+    position: "absolute",
+    right: -6,
+    top: -6,
+    backgroundColor: "#631C11",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notificationText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });
