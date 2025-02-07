@@ -160,7 +160,7 @@ export default function DetailsBook({ route }) {
     );
   };
 
-  const handleDeactivateBook = async () => {
+  const handleDesactivateBook = async () => {
     setShowOptionsModal(false);
     Alert.alert(
       "Confirmação",
@@ -172,8 +172,7 @@ export default function DetailsBook({ route }) {
           onPress: async () => {
             try {
               await desactivateBook(book.id);
-              setIsActive(false); // Atualiza o estado local após desativação
-              console.log("DESATIVANDO ISACTIVE: ", book.isActive);
+              setIsActive(false);
               Alert.alert("Sucesso", "Anúncio desativado com sucesso!");
               // navigation.goBack();
             } catch (error) {
@@ -199,9 +198,8 @@ export default function DetailsBook({ route }) {
           onPress: async () => {
             try {
               await activateBook(book.id);
-              setIsActive(true); // Atualiza o estado local após ativação
+              setIsActive(true);
               Alert.alert("Sucesso", "Anúncio ativado com sucesso!");
-              console.log("DESATIVANDO ISACTIVE: ", book.isActive);
               // navigation.goBack();
             } catch (error) {
               console.log("Erro ao ativar anúncio:", error);
@@ -414,7 +412,7 @@ export default function DetailsBook({ route }) {
             {isActive ? (
               <TouchableOpacity
                 style={styles.modalOption}
-                onPress={handleDeactivateBook}
+                onPress={handleDesactivateBook}
               >
                 <Text style={styles.modalText}>Desativar Anúncio</Text>
               </TouchableOpacity>

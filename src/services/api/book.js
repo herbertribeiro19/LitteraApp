@@ -138,7 +138,7 @@ export const desactivateBook = async (idBook) => {
         Authorization: `Bearer ${token}`,
       },
     });
-
+    console.log("RETORNO DO CONSOLE DESACTIVATE: ", bookData);
     return response.data;
   } catch (error) {
     console.log("Erro ao desativar o livro:", error);

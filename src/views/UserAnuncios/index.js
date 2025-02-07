@@ -59,6 +59,20 @@ export default function UserAnuncios() {
     );
   }
 
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return date
+      .toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+      .replace(",", " às");
+  };
+
   return (
     <LinearGradient
       colors={["#E4D5D2", "#F5F3F1", "#F5F3F1"]}
@@ -82,39 +96,34 @@ export default function UserAnuncios() {
               style={styles.bookCard}
               onPress={() => navigation.navigate("DetailsBook", { book })}
             >
-              <View style={styles.bookInfo}>
-                <Text style={styles.bookTitle}>{book.nome}</Text>
-                <Text style={styles.bookDescription}>{book.description}</Text>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Transação:</Text>
-                  <Text style={styles.detailValue}>
-                    {book.TypeTransaction.name}
-                  </Text>
+              <View style={styles.contentBook}>
+                <View style={styles.bookInfo}>
+                  <Text style={styles.bookTitle}>{book.nome}</Text>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>
+                      Anúnciado por você em:{" "}
+                      <Text style={styles.detailValue}>
+                        {formatDate(book.createdAt)}
+                      </Text>
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Condição:</Text>
-                  <Text style={styles.detailValue}>{book.StatusBook.name}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Gêneros:</Text>
-                  <Text style={styles.detailValue}>
-                    {book.Generos.map((genero) => genero.name).join(", ")}
-                  </Text>
+                <View>
+                  {book.imagens &&
+                  typeof book.imagens === "string" &&
+                  book.imagens.trim() !== "" ? (
+                    <Image
+                      source={{ uri: book.imagens }}
+                      style={styles.bookImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.bookImagePlaceholder}>
+                      <Text style={styles.placeholderText}>Sem imagem</Text>
+                    </View>
+                  )}
                 </View>
               </View>
-              {book.imagens &&
-              typeof book.imagens === "string" &&
-              book.imagens.trim() !== "" ? (
-                <Image
-                  source={{ uri: book.imagens }}
-                  style={styles.bookImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.bookImagePlaceholder}>
-                  <Text style={styles.placeholderText}>Sem imagem</Text>
-                </View>
-              )}
             </TouchableOpacity>
           ))
         ) : (
@@ -176,6 +185,15 @@ const styles = StyleSheet.create({
   bookInfo: {
     flex: 1,
     marginRight: 10,
+  },
+  contentBook: {
+    flex: 1,
+    flexDirection: "row-reverse",
+    justifyContent: "space-around",
+    alignContent: "center",
+    alignSelf: "center",
+    alignItems: "center",
+    gap: 20,
   },
   bookTitle: {
     fontSize: 18,

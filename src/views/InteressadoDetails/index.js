@@ -10,7 +10,7 @@ import { ChevronLeft } from "lucide-react-native";
 
 const InteressadoDetails = ({ route, navigation }) => {
   const { interessado } = route.params;
-  const phoneNumber = interessado.user.phone; // Número do WhatsApp com DDD e código do país
+  const phoneNumber = interessado.phone; // Número do WhatsApp com DDD e código do país
   const message =
     "Olá, você demonstrou interesse no livro que anunciei. Podemos conversar melhor?";
   const encodedMessage = encodeURIComponent(message);
@@ -38,13 +38,13 @@ const InteressadoDetails = ({ route, navigation }) => {
       <View style={styles.content}>
         <View style={styles.detailsContainer}>
           <Text style={styles.label}>Nome:</Text>
-          <Text style={styles.value}>{interessado.user.name}</Text>
+          <Text style={styles.value}>{interessado.name}</Text>
 
           <Text style={styles.label}>Email:</Text>
-          <Text style={styles.value}>{interessado.user.email}</Text>
+          <Text style={styles.value}>{interessado.email}</Text>
 
           <Text style={styles.label}>Telefone:</Text>
-          <Text style={styles.value}>{interessado.user.phone}</Text>
+          <Text style={styles.value}>{interessado.phone}</Text>
         </View>
 
         <TouchableOpacity style={styles.contactButton} onPress={handleContact}>
@@ -56,10 +56,12 @@ const InteressadoDetails = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F3F1",
+  },
   content: {
-    // flex: 1,
     padding: 16,
-    // backgroundColor: "#F5F3F1",
   },
   header: {
     marginTop: "24%",
@@ -80,12 +82,6 @@ const styles = StyleSheet.create({
     marginTop: "1%",
     fontSize: 12,
     fontWeight: "300",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#631C11",
-    marginBottom: 20,
   },
   detailsContainer: {
     backgroundColor: "#FFFFFF",

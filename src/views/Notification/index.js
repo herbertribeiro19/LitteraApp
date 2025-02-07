@@ -10,16 +10,12 @@ import {
 import { getNotification } from "../../services/api/notification";
 import { ChevronLeft } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 export default function Notification() {
   const navigation = useNavigation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
 
   const fetchNotifications = async () => {
     try {
@@ -31,6 +27,12 @@ export default function Notification() {
       setLoading(false);
     }
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchNotifications();
+    }, [])
+  );
 
   if (loading) {
     return (
@@ -64,10 +66,20 @@ export default function Notification() {
             data={notifications}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
-              <View style={styles.notificationItem}>
+              <TouchableOpacity
+                style={styles.notificationItem}
+                onPress={() =>
+                  navigation.navigate("InteressadoDetails", {
+                    interessado: item.InterestedUser,
+                  })
+                }
+              >
                 <Text style={styles.notificationTitle}>Novo interessado!</Text>
                 <Text style={styles.notificationMessage}>{item.message}</Text>
-              </View>
+                <Text style={styles.notificationTime}>
+                  {new Date(item.createdAt).toLocaleString()}
+                </Text>
+              </TouchableOpacity>
             )}
           />
         )}
@@ -77,8 +89,10 @@ export default function Notification() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   content: {
-    // flex: 1,
     padding: 16,
     height: "100%",
     paddingBottom: "90%",
@@ -92,11 +106,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: "transparent",
   },
-  boxList: {
-    marginHorizontal: "3%",
-    flexDirection: "column",
-    height: "60%",
-  },
   textbold: {
     color: "#631C11",
     fontSize: 26,
@@ -107,16 +116,6 @@ const styles = StyleSheet.create({
     marginTop: "1%",
     fontSize: 12,
     fontWeight: "300",
-  },
-  textBold: {
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#631C11",
-    marginBottom: 16,
   },
   notificationItem: {
     backgroundColor: "#FFFFFF",
@@ -133,6 +132,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     marginTop: 4,
+  },
+  notificationTime: {
+    fontSize: 12,
+    color: "#777",
+    marginTop: 4,
+    fontStyle: "italic",
   },
   emptyText: {
     fontSize: 16,

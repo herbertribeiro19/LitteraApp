@@ -13,7 +13,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { getUser } from "../../services/api/users";
 import { UserRoundPen, LogOut, LibraryBig, Bell } from "lucide-react-native";
-import { getNotification } from "../../services/api/notification";
+import {
+  getNotification,
+  notificationRead,
+} from "../../services/api/notification";
 
 export default function Header() {
   const navigation = useNavigation();
@@ -103,9 +106,26 @@ export default function Header() {
     }
   };
 
-  const handleNotificationPress = () => {
-    setNotificationCount(0); // Zera o contador
-    navigation.navigate("Notification"); // Navega para a página de notificações
+  const handleNotificationPress = async () => {
+    try {
+      // Marca as notificações como lidas
+      await notificationRead();
+
+      // Busca as notificações atualizadas do backend
+      const updatedNotifications = await getNotification();
+
+      // Atualiza o contador com o número de notificações não lidas
+      setNotificationCount(updatedNotifications.notifications.length);
+
+      // Navega para a página de notificações
+      navigation.navigate("Notification");
+    } catch (error) {
+      console.log("Erro ao marcar notificações como lidas:", error);
+      Alert.alert(
+        "Erro",
+        error.message || "Não foi possível marcar as notificações como lidas."
+      );
+    }
   };
 
   return (
