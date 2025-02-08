@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     height: "100%",
-    paddingBottom: "90%",
+    paddingBottom: "46%",
   },
   header: {
     marginTop: "24%",

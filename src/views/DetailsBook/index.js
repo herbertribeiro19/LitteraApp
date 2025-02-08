@@ -174,7 +174,7 @@ export default function DetailsBook({ route }) {
               await desactivateBook(book.id);
               setIsActive(false);
               Alert.alert("Sucesso", "Anúncio desativado com sucesso!");
-              // navigation.goBack();
+              navigation.goBack();
             } catch (error) {
               console.log("Erro ao desativar anúncio:", error);
               Alert.alert("Erro", "Não foi possível desativar o anúncio.");
@@ -200,7 +200,7 @@ export default function DetailsBook({ route }) {
               await activateBook(book.id);
               setIsActive(true);
               Alert.alert("Sucesso", "Anúncio ativado com sucesso!");
-              // navigation.goBack();
+              navigation.goBack();
             } catch (error) {
               console.log("Erro ao ativar anúncio:", error);
               Alert.alert("Erro", "Não foi possível ativar o anúncio.");

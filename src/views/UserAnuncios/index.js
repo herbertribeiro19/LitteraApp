@@ -29,12 +29,25 @@ export default function UserAnuncios() {
 
         const response = await getBook(); // Busca todos os livros da API
 
-        // Converte userId para número e filtra apenas os livros do usuário logado
+        if (!response.books) return;
+
+        const userIdNumber = Number(userId);
+
+        // Separa os livros do usuário e os de outros usuários
         const userBooks = response.books.filter(
-          (book) => book.ownerBook === Number(userId)
+          (book) => book.ownerBook === userIdNumber
         );
 
-        setBooks(userBooks); // Atualiza o estado apenas com os livros do usuário
+        const otherBooks = response.books.filter(
+          (book) => book.ownerBook !== userIdNumber
+        );
+
+        // Junta os livros do usuário primeiro, seguidos pelos outros, e ordena por ID
+        const sortedBooks = [...userBooks, ...otherBooks].sort(
+          (a, b) => b.id - a.id
+        );
+
+        setBooks(sortedBooks);
       } catch (error) {
         console.log("Erro ao buscar livros:", error);
         Alert.alert("Erro", "Não foi possível carregar os anúncios.");

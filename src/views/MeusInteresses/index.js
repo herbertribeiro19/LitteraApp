@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { getMeusInteresses } from "../../services/api/interesse"; // Importando o serviço
 import { ChevronLeft } from "lucide-react-native"; // Ícone de voltar
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,22 +18,24 @@ export default function MeusInteresses() {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const fetchInteresses = async () => {
-      try {
-        const response = await getMeusInteresses(); // Obtendo os interesses
-        console.log("Meus interesses:", response); // Log para depuração
-        setInteresses(response); // Atualiza a lista com os livros de interesse
-      } catch (error) {
-        console.log("Erro ao carregar meus interesses", error);
-        Alert.alert("Erro", "Não foi possível carregar seus interesses.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchInteresses = async () => {
+    try {
+      const response = await getMeusInteresses();
+      console.log("Meus interesses:", response);
+      setInteresses(response);
+    } catch (error) {
+      console.log("Erro ao carregar meus interesses", error);
+      Alert.alert("Erro", "Não foi possível carregar seus interesses.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchInteresses();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchInteresses();
+    }, [])
+  );
 
   const handlePressBook = (bookId) => {
     const book = interesses.find((item) => item.id === bookId); // Encontra o livro completo baseado no ID
@@ -48,6 +50,9 @@ export default function MeusInteresses() {
         onPress={() => handlePressBook(item.id)} // Passando o id do livro para a página de detalhes
       >
         <Text style={styles.bookTitle}>{item.nome}</Text>
+        <Text style={styles.bookTitle}>{item.cidade}</Text>
+        <Text style={styles.bookTitle}>{item.valor}</Text>
+        
       </TouchableOpacity>
     );
   };

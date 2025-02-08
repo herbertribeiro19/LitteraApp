@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,8 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+// import { useFocusEffect } from "@react-navigation/native"
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { getBook } from "../../services/api/book";
 import { getGenero } from "../../services/api/genero";
 import { LinearGradient } from "expo-linear-gradient";
@@ -20,28 +21,35 @@ import { Search, Filter, MagnetIcon, Sparkles } from "lucide-react-native";
 export default function SearchBar() {
   const navigation = useNavigation();
   const [searchText, setSearchText] = useState("");
+  const [maxPrice, setMaxPrice] = useState(100); // Ajuste conforme necessário
   const [books, setBooks] = useState([]);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [selectedCity, setSelectedCity] = useState("");
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
   const IA = require("../../assets/IA.png");
   const transactions = ["Venda", "Troca", "Doação"];
 
-  useEffect(() => {
-    fetchBooks();
-    fetchGenres();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchBooks();
+      fetchGenres();
+    }, [])
+  );
 
   const fetchBooks = async () => {
     setIsLoading(true);
     try {
       const response = await getBook();
       if (response.books) {
-        const sortedBooks = response.books.sort((a, b) => b.id - a.id);
+        const activeBooks = response.books.filter(
+          (book) => book.isActive === true
+        );
+        const sortedBooks = activeBooks.sort((a, b) => b.id - a.id);
         setBooks(sortedBooks);
         setFilteredBooks(sortedBooks);
       }
@@ -66,23 +74,25 @@ export default function SearchBar() {
 
   const handleSearch = (text) => {
     setSearchText(text);
-    filterBooks(text, selectedGenre, selectedTransaction);
+    filterBooks(text, selectedGenre, selectedTransaction, selectedCity);
   };
 
-  const handleFilter = (genre, transaction) => {
+  const handleFilter = (genre, transaction, city) => {
     setSelectedGenre(genre === selectedGenre ? null : genre);
     setSelectedTransaction(
       transaction === selectedTransaction ? null : transaction
     );
+    setSelectedCity(city === selectedCity ? "" : city);
     filterBooks(
       searchText,
       genre === selectedGenre ? null : genre,
-      transaction === selectedTransaction ? null : transaction
+      transaction === selectedTransaction ? null : transaction,
+      city === selectedCity ? "" : city
     );
     setIsFilterModalVisible(false);
   };
 
-  const filterBooks = (text, genre, transaction) => {
+  const filterBooks = (text, genre, transaction, city) => {
     let filtered = books;
 
     if (text) {
@@ -98,6 +108,11 @@ export default function SearchBar() {
     if (transaction) {
       filtered = filtered.filter(
         (book) => book.TypeTransaction.name === transaction
+      );
+    }
+    if (city) {
+      filtered = filtered.filter((book) =>
+        book.cidade.toLowerCase().includes(city.toLowerCase())
       );
     }
 
@@ -144,7 +159,9 @@ export default function SearchBar() {
                       styles.filterButton,
                       selectedGenre === item && styles.selectedFilter,
                     ]}
-                    onPress={() => handleFilter(item, selectedTransaction)}
+                    onPress={() =>
+                      handleFilter(item, selectedTransaction, selectedCity)
+                    }
                   >
                     <Text style={styles.filterText}>{item}</Text>
                   </TouchableOpacity>
@@ -165,7 +182,9 @@ export default function SearchBar() {
                       styles.filterButton,
                       selectedTransaction === item && styles.selectedFilter,
                     ]}
-                    onPress={() => handleFilter(selectedGenre, item)}
+                    onPress={() =>
+                      handleFilter(selectedGenre, item, selectedCity)
+                    }
                   >
                     <Text style={styles.filterText}>{item}</Text>
                   </TouchableOpacity>
@@ -174,6 +193,25 @@ export default function SearchBar() {
                 showsHorizontalScrollIndicator={false}
               />
             </View>
+
+            <View style={styles.filterGroup}>
+              <Text style={styles.filterLabel}>Cidade:</Text>
+              <TextInput
+                style={styles.cityInput}
+                placeholder="Digite a cidade..."
+                value={selectedCity}
+                onChangeText={(text) => setSelectedCity(text)}
+              />
+              <TouchableOpacity
+                style={styles.filterButton}
+                onPress={() =>
+                  handleFilter(selectedGenre, selectedTransaction, selectedCity)
+                }
+              >
+                <Text style={styles.filterText}>Filtrar por Cidade</Text>
+              </TouchableOpacity>
+            </View>
+
             <TouchableOpacity
               style={styles.closeModalButton}
               onPress={() => setIsFilterModalVisible(false)}
@@ -211,6 +249,7 @@ export default function SearchBar() {
                 <Text style={styles.bookDetail}>
                   {item.TypeTransaction.name}
                 </Text>
+                <Text style={styles.bookDetail}>{item.cidade}</Text>
               </View>
             </TouchableOpacity>
           )}
@@ -260,6 +299,12 @@ const styles = StyleSheet.create({
   },
   searchIcon: {
     marginRight: 10,
+  },
+  cityInput: {
+    backgroundColor: "#f8f8f8",
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 8,
   },
   modalContainer: {
     flex: 1,

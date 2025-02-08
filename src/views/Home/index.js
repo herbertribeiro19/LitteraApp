@@ -34,7 +34,10 @@ export default function Home() {
     try {
       const response = await getBook();
       if (response.books) {
-        const sortedBooks = response.books.sort((a, b) => b.id - a.id);
+        const activeBooks = response.books.filter(
+          (book) => book.isActive === true
+        );
+        const sortedBooks = activeBooks.sort((a, b) => b.id - a.id);
         setBooks(sortedBooks);
         setFilteredBooks(sortedBooks);
       }
