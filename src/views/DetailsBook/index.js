@@ -227,9 +227,15 @@ export default function DetailsBook({ route }) {
   };
 
   const handlePressInteressado = (interessado) => {
-    navigation.navigate("InteressadoDetails", { interessado });
+    const normalizedInteressado = {
+      name: interessado.user.name,
+      email: interessado.user.email,
+      phone: interessado.user.phone,
+    };
+    navigation.navigate("InteressadoDetails", {
+      interessado: normalizedInteressado,
+    });
   };
-
   if (!book || loading) {
     return <ActivityIndicator size="large" color="#631C11" />;
   }

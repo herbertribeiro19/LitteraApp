@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Eye } from "lucide-react-native";
 
 const InteressadosList = ({ interessados, onPressInteressado }) => {
+  console.log("Dados recebidos no InteressadosList:", interessados); // Para depuração
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Interessados no Livro</Text>

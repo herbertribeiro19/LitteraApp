@@ -11,7 +11,6 @@ import {
   Alert,
   Modal,
 } from "react-native";
-// import { useFocusEffect } from "@react-navigation/native"
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { getBook } from "../../services/api/book";
 import { getGenero } from "../../services/api/genero";
@@ -30,6 +29,7 @@ export default function SearchBar() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [selectedCity, setSelectedCity] = useState("");
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [sortOrder, setSortOrder] = useState(null); // 'asc' ou 'desc'
 
   const IA = require("../../assets/IA.png");
   const transactions = ["Venda", "Troca", "Doação"];
@@ -74,25 +74,34 @@ export default function SearchBar() {
 
   const handleSearch = (text) => {
     setSearchText(text);
-    filterBooks(text, selectedGenre, selectedTransaction, selectedCity);
+    filterBooks(
+      text,
+      selectedGenre,
+      selectedTransaction,
+      selectedCity,
+      sortOrder
+    );
   };
 
   const handleFilter = (genre, transaction, city) => {
-    setSelectedGenre(genre === selectedGenre ? null : genre);
-    setSelectedTransaction(
-      transaction === selectedTransaction ? null : transaction
-    );
-    setSelectedCity(city === selectedCity ? "" : city);
-    filterBooks(
-      searchText,
-      genre === selectedGenre ? null : genre,
-      transaction === selectedTransaction ? null : transaction,
-      city === selectedCity ? "" : city
-    );
-    setIsFilterModalVisible(false);
+    setSelectedGenre(genre);
+    setSelectedTransaction(transaction);
+    setSelectedCity(city);
+    filterBooks(searchText, genre, transaction, city, sortOrder);
   };
 
-  const filterBooks = (text, genre, transaction, city) => {
+  const handleSortOrder = (order) => {
+    setSortOrder(order);
+    filterBooks(
+      searchText,
+      selectedGenre,
+      selectedTransaction,
+      selectedCity,
+      order
+    );
+  };
+
+  const filterBooks = (text, genre, transaction, city, order) => {
     let filtered = books;
 
     if (text) {
@@ -114,6 +123,12 @@ export default function SearchBar() {
       filtered = filtered.filter((book) =>
         book.cidade.toLowerCase().includes(city.toLowerCase())
       );
+    }
+
+    if (order === "asc") {
+      filtered = filtered.sort((a, b) => a.nome.localeCompare(b.nome));
+    } else if (order === "desc") {
+      filtered = filtered.sort((a, b) => b.nome.localeCompare(a.nome));
     }
 
     setFilteredBooks(filtered);
@@ -209,6 +224,28 @@ export default function SearchBar() {
                 }
               >
                 <Text style={styles.filterText}>Filtrar por Cidade</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.filterGroup}>
+              <Text style={styles.filterLabel}>Ordenar por Nome:</Text>
+              <TouchableOpacity
+                style={[
+                  styles.filterButton,
+                  sortOrder === "asc" && styles.selectedFilter,
+                ]}
+                onPress={() => handleSortOrder("asc")}
+              >
+                <Text style={styles.filterText}>A-Z</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.filterButton,
+                  sortOrder === "desc" && styles.selectedFilter,
+                ]}
+                onPress={() => handleSortOrder("desc")}
+              >
+                <Text style={styles.filterText}>Z-A</Text>
               </TouchableOpacity>
             </View>
 

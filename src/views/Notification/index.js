@@ -74,7 +74,9 @@ export default function Notification() {
                   })
                 }
               >
-                <Text style={styles.notificationTitle}>Novo interessado!</Text>
+                <Text style={styles.notificationTitle}>
+                  Novo interessado(a)!
+                </Text>
                 <Text style={styles.notificationMessage}>{item.message}</Text>
                 <Text style={styles.notificationTime}>
                   {new Date(item.createdAt).toLocaleString()}

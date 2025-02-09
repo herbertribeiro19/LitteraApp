@@ -10,6 +10,8 @@ import { ChevronLeft } from "lucide-react-native";
 
 const InteressadoDetails = ({ route, navigation }) => {
   const { interessado } = route.params;
+  console.log("Dados recebidos no InteressadoDetails:", interessado); // Para depuração
+
   const phoneNumber = interessado.phone; // Número do WhatsApp com DDD e código do país
   const message =
     "Olá, você demonstrou interesse no livro que anunciei. Podemos conversar melhor?";
