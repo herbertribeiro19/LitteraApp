@@ -14,8 +14,9 @@ import {
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { getBook } from "../../services/api/book";
 import { getGenero } from "../../services/api/genero";
+import { getTransactions } from "../../services/api/transactions";
 import { LinearGradient } from "expo-linear-gradient";
-import { Search, Filter, MagnetIcon, Sparkles } from "lucide-react-native";
+import { Search, Filter, Sparkles } from "lucide-react-native";
 
 export default function SearchBar() {
   const navigation = useNavigation();
@@ -26,18 +27,20 @@ export default function SearchBar() {
   const [isLoading, setIsLoading] = useState(false);
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
+  const [transaction, setTransaction] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [selectedCity, setSelectedCity] = useState("");
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [sortOrder, setSortOrder] = useState(null); // 'asc' ou 'desc'
 
   const IA = require("../../assets/IA.png");
-  const transactions = ["Venda", "Troca", "Doação"];
+  // const transactions = ["Venda", "Troca", "Doação"];
 
   useFocusEffect(
     useCallback(() => {
       fetchBooks();
       fetchGenres();
+      fetchTransactions();
     }, [])
   );
 
@@ -72,6 +75,20 @@ export default function SearchBar() {
     }
   };
 
+  const fetchTransactions = async () => {
+    try {
+      const response = await getTransactions();
+      if (response) {
+        setTransaction(
+          response.typeTransaction.map((transaction) => transaction.name)
+        );
+      }
+      console.log("TRANSACOES: ", transaction);
+    } catch (error) {
+      console.log("Erro ao buscar transactionsType:", error);
+    }
+  };
+
   const handleSearch = (text) => {
     setSearchText(text);
     filterBooks(
@@ -84,10 +101,13 @@ export default function SearchBar() {
   };
 
   const handleFilter = (genre, transaction, city) => {
-    setSelectedGenre(genre);
-    setSelectedTransaction(transaction);
+    const newGenre = selectedGenre === genre ? null : genre;
+    setSelectedGenre(newGenre);
+    const newTransaction =
+      selectedTransaction === transaction ? null : transaction;
+    setSelectedTransaction(newTransaction);
     setSelectedCity(city);
-    filterBooks(searchText, genre, transaction, city, sortOrder);
+    filterBooks(searchText, newGenre, newTransaction, city, sortOrder);
   };
 
   const handleSortOrder = (order) => {
@@ -189,7 +209,7 @@ export default function SearchBar() {
             <View style={styles.filterGroup}>
               <Text style={styles.filterLabel}>Transação:</Text>
               <FlatList
-                data={transactions}
+                data={transaction}
                 keyExtractor={(item) => item}
                 renderItem={({ item }) => (
                   <TouchableOpacity
@@ -227,25 +247,25 @@ export default function SearchBar() {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.filterGroup}>
+            <View style={styles.filterOrder}>
               <Text style={styles.filterLabel}>Ordenar por Nome:</Text>
               <TouchableOpacity
                 style={[
-                  styles.filterButton,
-                  sortOrder === "asc" && styles.selectedFilter,
+                  styles.filterButtonOrder,
+                  sortOrder === "asc" && styles.selectedFilterOrder,
                 ]}
                 onPress={() => handleSortOrder("asc")}
               >
-                <Text style={styles.filterText}>A-Z</Text>
+                <Text style={styles.filterTextOrder}>A-Z</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
-                  styles.filterButton,
-                  sortOrder === "desc" && styles.selectedFilter,
+                  styles.filterButtonOrder,
+                  sortOrder === "desc" && styles.selectedFilterOrder,
                 ]}
                 onPress={() => handleSortOrder("desc")}
               >
-                <Text style={styles.filterText}>Z-A</Text>
+                <Text style={styles.filterTextOrder}>Z-A</Text>
               </TouchableOpacity>
             </View>
 
@@ -340,7 +360,7 @@ const styles = StyleSheet.create({
   cityInput: {
     backgroundColor: "#f8f8f8",
     borderRadius: 8,
-    padding: 8,
+    padding: 14,
     marginBottom: 8,
   },
   modalContainer: {
@@ -359,6 +379,9 @@ const styles = StyleSheet.create({
   filterGroup: {
     marginBottom: 15,
   },
+  filterOrder: {
+    gap: 4,
+  },
   filterLabel: {
     fontSize: 14,
     fontWeight: "bold",
@@ -371,11 +394,27 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginRight: 8,
   },
+  filterButtonOrder: {
+    backgroundColor: "#F5F3F1",
+    borderColor: "#631C11",
+    borderWidth: 0.6,
+    padding: 8,
+    borderRadius: 6,
+    marginRight: 8,
+  },
   selectedFilter: {
     backgroundColor: "#1E1F24",
+    margin: 5,
+  },
+  selectedFilterOrder: {
+    backgroundColor: "#ddd",
+    margin: 5,
   },
   filterText: {
     color: "#FFFFFF",
+  },
+  filterTextOrder: {
+    color: "#631C11",
   },
   closeModalButton: {
     backgroundColor: "#631C11",

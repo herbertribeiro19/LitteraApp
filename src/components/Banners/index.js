@@ -3,8 +3,8 @@ import { View, Image, StyleSheet } from "react-native";
 import Swiper from "react-native-swiper";
 
 const banners = [
-  { id: "1", image: require("../../assets/banner01.png") },
-  { id: "2", image: require("../../assets/banner02.png") },
+  { id: "1", image: require("../../assets/bannerimg.png") },
+  { id: "2", image: require("../../assets/banner03.png") },
 ];
 
 const BannerCarousel = () => {
@@ -29,8 +29,8 @@ const BannerCarousel = () => {
 
 const styles = StyleSheet.create({
   carouselContainer: {
-    width: "370",
-    height: 173,
+    width: "364",
+    height: 136,
     marginBottom: 10,
     alignContent: "center",
     alignSelf: "center",
@@ -39,13 +39,13 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   bannerContainer: {
-    width: "370",
+    width: "364",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 100,
   },
   bannerImage: {
-    width: "370",
+    width: "364",
     resizeMode: "cover",
   },
 });
