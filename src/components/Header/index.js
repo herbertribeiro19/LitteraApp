@@ -20,7 +20,7 @@ import {
 
 export default function Header() {
   const navigation = useNavigation();
-  const [userName, setUserName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const logoMale = require("../../assets/iconuserM.png");
@@ -33,8 +33,8 @@ export default function Header() {
     }, [])
   );
 
-  const isFemale = (name) => {
-    return name.toLowerCase().endsWith("a");
+  const isFemale = (nickname) => {
+    return nickname.toLowerCase().endsWith("a");
   };
 
   const handleLogout = async () => {
@@ -86,9 +86,9 @@ export default function Header() {
       if (!token) throw new Error("Token não encontrado");
 
       const userData = await getUser(token);
-      if (userData?.user?.name) {
-        const firstName = userData.user.name.split(" ")[0];
-        setUserName(firstName);
+      if (userData?.user?.nickname) {
+        // const apelido = userData.user.nickname.split(" ")[0];
+        setNickname(userData.user.nickname);
       } else {
         throw new Error("Nome do usuário não encontrado");
       }
@@ -135,12 +135,12 @@ export default function Header() {
         onPress={() => setModalVisible(true)}
       >
         <Image
-          source={isFemale(userName) ? logoFemale : logoMale}
+          source={isFemale(nickname) ? logoFemale : logoMale}
           style={styles.logo}
         />
       </TouchableOpacity>
       <Text style={styles.name}>
-        Olá, <Text style={styles.nameuser}>{userName || "Usuário"}</Text>
+        Olá, <Text style={styles.nameuser}>{nickname || "Usuário"}</Text>
       </Text>
 
       {/* Ícone de Notificações */}

@@ -26,7 +26,7 @@ export const getUser = async () => {
   }
 };
 
-export const editUser = async (name, email, phone) => {
+export const editUser = async (name, nickname, email, phone) => {
   try {
     const token = await AsyncStorage.getItem("token");
     const userId = await AsyncStorage.getItem("userId");
@@ -37,7 +37,7 @@ export const editUser = async (name, email, phone) => {
 
     const response = await api.put(
       `/users/${userId}`,
-      { name, email, phone }, // Enviando os dados atualizados
+      { name, nickname, email, phone }, // Enviando os dados atualizados
       {
         headers: {
           Authorization: `Bearer ${token}`,

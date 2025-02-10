@@ -1,10 +1,11 @@
 import api from "./api";
 
 // Criar conta (Registro)
-export const registerUser = async (name, email, password, phone) => {
+export const registerUser = async (name, nickname, email, password, phone) => {
   try {
     const response = await api.post("/auth/register", {
       name,
+      nickname,
       email,
       password,
       phone,

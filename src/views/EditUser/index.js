@@ -18,11 +18,12 @@ export default function EditUser() {
   const navigation = useNavigation();
 
   const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  // const [password, setPassword] = useState("");
+  // const [confirmPassword, setConfirmPassword] = useState("");
+  // const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   useEffect(() => {
     fetchUser();
@@ -37,11 +38,12 @@ export default function EditUser() {
 
       if (userData?.user) {
         setName(userData.user.name || "");
+        setNickname(userData.user.nickname || "");
         setEmail(userData.user.email || "");
         setPhone(userData.user.phone || "");
       }
     } catch (error) {
-      // console.error("Erro ao buscar usuário:", error);
+      console.log("Erro ao buscar usuário:", error);
     }
   };
 
@@ -52,7 +54,7 @@ export default function EditUser() {
     }
 
     try {
-      await editUser(name, email, phone);
+      await editUser(name, nickname, email, phone);
       Alert.alert("Sucesso", "Dados do usuário atualizado com sucesso!");
       navigation.goBack();
     } catch (error) {
@@ -85,6 +87,12 @@ export default function EditUser() {
           value={name}
           onChangeText={setName}
           placeholder="Nome"
+        />
+        <TextInput
+          style={styles.input}
+          value={nickname}
+          onChangeText={setNickname}
+          placeholder="Nome social (Apelido)"
         />
         <TextInput
           style={styles.input}

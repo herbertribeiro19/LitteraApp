@@ -21,6 +21,7 @@ export default function Register() {
   const logo = require("../../assets/logo.png");
 
   const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,7 +43,7 @@ export default function Register() {
     }
 
     try {
-      await registerUser(name, email, password, phone);
+      await registerUser(name, nickname, email, password, phone);
       Alert.alert("Sucesso", "Usuário criado com sucesso!");
       navigation.navigate("Login");
     } catch (error) {
@@ -67,6 +68,14 @@ export default function Register() {
                 placeholderTextColor="#f1f1f1"
                 value={name}
                 onChangeText={setName}
+                autoCapitalize="none"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Nome social (Apelido)"
+                placeholderTextColor="#f1f1f1"
+                value={nickname}
+                onChangeText={setNickname}
                 autoCapitalize="none"
               />
               <TextInput
