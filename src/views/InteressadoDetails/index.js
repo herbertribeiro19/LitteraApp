@@ -42,11 +42,12 @@ const InteressadoDetails = ({ route, navigation }) => {
           <Text style={styles.label}>Nome:</Text>
           <Text style={styles.value}>{interessado.name}</Text>
 
-          <Text style={styles.label}>Email:</Text>
-          <Text style={styles.value}>{interessado.email}</Text>
+          {/* <Text style={styles.label}>Email:</Text>
+          <Text style={styles.value}>{interessado.email}</Text> */}
 
           <Text style={styles.label}>Telefone:</Text>
-          <Text style={styles.value}>{interessado.phone}</Text>
+          {/* <Text style={styles.value}>{interessado.phone}</Text> */}
+          <Text style={styles.value}>***********</Text>
         </View>
 
         <TouchableOpacity style={styles.contactButton} onPress={handleContact}>

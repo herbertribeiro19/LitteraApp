@@ -16,9 +16,11 @@ const InteressadosList = ({ interessados, onPressInteressado }) => {
         >
           <View>
             <Text style={styles.interessadoNome}>{interessado.user.name}</Text>
-            <Text style={styles.interessadoInfo}>{interessado.user.email}</Text>
-            <Text style={styles.interessadoInfo}>{interessado.user.phone}</Text>
+            {/* <Text style={styles.interessadoInfo}>{interessado.user.email}</Text> */}
+            <Text style={styles.interessadoInfo}>***********</Text>
+            {/* <Text style={styles.interessadoInfo}>{interessado.user.phone}</Text> */}
           </View>
+
           <View style={styles.icon}>
             <Eye size={24} color="#631C11" />
           </View>

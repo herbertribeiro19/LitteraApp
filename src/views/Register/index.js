@@ -9,11 +9,21 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   TextInput,
+  Modal,
+  FlatList,
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { registerUser } from "../../services/api/authService";
-import { Eye, EyeOff } from "lucide-react-native";
+import { Eye, EyeOff, Globe } from "lucide-react-native"; // Adicionei o ícone Globe
+import { MaskedTextInput } from "react-native-mask-text";
+
+const countryList = [
+  { name: "Brasil", code: "55", flag: "🇧🇷" },
+  { name: "Estados Unidos", code: "1", flag: "🇺🇸" },
+  { name: "Portugal", code: "351", flag: "🇵🇹" },
+  { name: "Argentina", code: "54", flag: "🇦🇷" },
+];
 
 export default function Register() {
   const navigation = useNavigation();
@@ -26,6 +36,9 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("55");
+  const [countryFlag, setCountryFlag] = useState("🇧🇷");
+  const [isCountryModalVisible, setIsCountryModalVisible] = useState(false);
 
   // Estado para alternar visibilidade da senha
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -42,8 +55,11 @@ export default function Register() {
       return;
     }
 
+    // Formata o telefone com o código do país e remove caracteres não numéricos
+    const formattedPhone = `${countryCode}${phone.replace(/\D/g, "")}`;
+
     try {
-      await registerUser(name, nickname, email, password, phone);
+      await registerUser(name, nickname, email, password, formattedPhone);
       Alert.alert("Sucesso", "Usuário criado com sucesso!");
       navigation.navigate("Login");
     } catch (error) {
@@ -52,6 +68,12 @@ export default function Register() {
         "Verifique as informações e tente novamente."
       );
     }
+  };
+
+  const onSelectCountry = (country) => {
+    setCountryCode(country.code);
+    setCountryFlag(country.flag);
+    setIsCountryModalVisible(false);
   };
 
   return (
@@ -87,15 +109,28 @@ export default function Register() {
                 onChangeText={setEmail}
                 autoCapitalize="none"
               />
-              <TextInput
-                style={styles.input}
-                placeholder="Telefone"
-                keyboardType="phone-pad"
-                placeholderTextColor="#f1f1f1"
-                value={phone}
-                onChangeText={setPhone}
-                autoCapitalize="none"
-              />
+
+              <View style={styles.phoneContainer}>
+                <View style={styles.left}>
+                  <TouchableOpacity
+                    style={styles.countryPickerButton}
+                    onPress={() => setIsCountryModalVisible(true)}
+                  >
+                    <Text style={styles.countryFlag}>{countryFlag}</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.countryCode}>+{countryCode}</Text>
+                </View>
+                <View style={styles.right}>
+                  <MaskedTextInput
+                    style={styles.phoneInput}
+                    placeholder="Telefone"
+                    keyboardType="phone-pad"
+                    value={phone}
+                    onChangeText={(text, rawText) => setPhone(rawText)}
+                    mask="(99) 99999-9999"
+                  />
+                </View>
+              </View>
 
               <View style={styles.passwordContainer}>
                 <TextInput
@@ -159,6 +194,38 @@ export default function Register() {
             </Text>
           </View>
         </ImageBackground>
+        {/* Modal de seleção de país */}
+        <Modal
+          visible={isCountryModalVisible}
+          animationType="slide"
+          transparent
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <FlatList
+                data={countryList}
+                keyExtractor={(item) => item.code}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.countryItem}
+                    onPress={() => onSelectCountry(item)}
+                  >
+                    <Text style={styles.flag}>{item.flag}</Text>
+                    <Text style={styles.countryName}>
+                      {item.name} (+{item.code})
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+              <TouchableOpacity
+                style={styles.modalClose}
+                onPress={() => setIsCountryModalVisible(false)}
+              >
+                <Text style={styles.modalCloseText}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -211,6 +278,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     padding: 16,
     marginBottom: 10,
+    color: "#F5F3F1",
+  },
+  phoneContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "86%",
+    alignSelf: "center",
+    justifyContent: "center",
+    borderBottomWidth: 2,
+    borderRadius: 6,
+    borderBottomColor: "#F5F3F1",
+    marginBottom: 10,
+  },
+  right: {
+    flexDirection: "row",
+    width: "70%",
+  },
+  left: {
+    flexDirection: "row",
+    width: "20%",
+  },
+  phoneInput: {
+    flex: 1,
+    fontSize: 16,
+    padding: 16,
     color: "#F5F3F1",
   },
   passwordContainer: {
@@ -277,5 +369,53 @@ const styles = StyleSheet.create({
     color: "#F5F3F1",
     fontSize: 16,
     fontWeight: "500",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+  },
+  countryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  flag: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  countryName: {
+    fontSize: 18,
+  },
+  modalClose: {
+    marginTop: 10,
+    alignSelf: "center",
+  },
+  modalCloseText: {
+    fontSize: 16,
+    color: "red",
+  },
+  countryPickerButton: {
+    marginRight: 10,
+  },
+  countryCode: {
+    alignSelf: "center",
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  countryFlag: {
+    alignSelf: "left",
+    fontSize: 24,
+    color: "#fff",
   },
 });

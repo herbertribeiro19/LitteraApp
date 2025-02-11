@@ -65,8 +65,8 @@ export default function Header() {
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Sair", onPress: handleLogout },
-      ],
-      { cancelable: false }
+      ]
+      // { cancelable: false }m,.
     );
   };
 
@@ -86,11 +86,13 @@ export default function Header() {
       if (!token) throw new Error("Token não encontrado");
 
       const userData = await getUser(token);
-      if (userData?.user?.nickname) {
-        // const apelido = userData.user.nickname.split(" ")[0];
-        setNickname(userData.user.nickname);
+      if (userData?.user) {
+        // Verifica se o nickname está disponível
+        const displayName =
+          userData.user.nickname || userData.user.name.split(" ")[0];
+        setNickname(displayName);
       } else {
-        throw new Error("Nome do usuário não encontrado");
+        throw new Error("Dados do usuário não encontrados");
       }
     } catch (error) {
       console.log("Erro ao buscar usuário:", error);

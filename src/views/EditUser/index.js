@@ -5,14 +5,23 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Modal,
+  FlatList,
   Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getUser } from "../../services/api/users";
-import { editUser } from "../../services/api/users";
+import { getUser, editUser } from "../../services/api/users";
 import { ChevronLeft } from "lucide-react-native";
+import { MaskedTextInput } from "react-native-mask-text";
+
+const countryList = [
+  { name: "Brasil", code: "55", flag: "🇧🇷" },
+  { name: "Estados Unidos", code: "1", flag: "🇺🇸" },
+  { name: "Portugal", code: "351", flag: "🇵🇹" },
+  { name: "Argentina", code: "54", flag: "🇦🇷" },
+];
 
 export default function EditUser() {
   const navigation = useNavigation();
@@ -21,9 +30,9 @@ export default function EditUser() {
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  // const [password, setPassword] = useState("");
-  // const [confirmPassword, setConfirmPassword] = useState("");
-  // const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [countryCode, setCountryCode] = useState("55");
+  const [countryFlag, setCountryFlag] = useState("🇧🇷");
+  const [isCountryModalVisible, setIsCountryModalVisible] = useState(false);
 
   useEffect(() => {
     fetchUser();
@@ -53,8 +62,10 @@ export default function EditUser() {
       return;
     }
 
+    const formattedPhone = `${countryCode}${phone.replace(/\D/g, "")}`;
+
     try {
-      await editUser(name, nickname, email, phone);
+      await editUser(name, nickname, email, formattedPhone);
       Alert.alert("Sucesso", "Dados do usuário atualizado com sucesso!");
       navigation.goBack();
     } catch (error) {
@@ -63,6 +74,12 @@ export default function EditUser() {
         "Verifique os dados do usuário e tente novamente."
       );
     }
+  };
+
+  const onSelectCountry = (country) => {
+    setCountryCode(country.code);
+    setCountryFlag(country.flag);
+    setIsCountryModalVisible(false);
   };
 
   return (
@@ -101,31 +118,35 @@ export default function EditUser() {
           placeholder="Email"
           keyboardType="email-address"
         />
-        <TextInput
+        {/* <MaskedTextInput
           style={styles.input}
           value={phone}
           onChangeText={setPhone}
-          placeholder="Telefone"
+          mask="(99) 99999-9999"
           keyboardType="phone-pad"
-        />
-        {/* <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.inputPassword}
-            placeholder="Nova Senha"
-            secureTextEntry={!isPasswordVisible}
-            value={password}
-            onChangeText={setPassword}
-          />
-          <TouchableOpacity
-            onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-          >
-            {isPasswordVisible ? (
-              <EyeOff size={24} color="#631C11" />
-            ) : (
-              <Eye size={24} color="#631C11" />
-            )}
-          </TouchableOpacity>
-        </View> */}
+          placeholder="Telefone"
+        /> */}
+        <View style={styles.phoneContainer}>
+          <View style={styles.left}>
+            <TouchableOpacity
+              style={styles.countryPickerButton}
+              onPress={() => setIsCountryModalVisible(true)}
+            >
+              <Text style={styles.countryFlag}>{countryFlag}</Text>
+            </TouchableOpacity>
+            <Text style={styles.countryCode}>+{countryCode}</Text>
+          </View>
+          <View style={styles.right}>
+            <MaskedTextInput
+              style={styles.phoneInput}
+              placeholder="Telefone"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={(text, rawText) => setPhone(rawText)}
+              mask="(99) 99999-9999"
+            />
+          </View>
+        </View>
       </View>
       <View style={styles.content}>
         <TouchableOpacity style={styles.btnRegister} onPress={handleUpdateUser}>
@@ -138,16 +159,39 @@ export default function EditUser() {
           <Text style={styles.textbtnlogin}>Cancelar</Text>
         </TouchableOpacity>
       </View>
+      {/* Modal de seleção de país */}
+      <Modal visible={isCountryModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <FlatList
+              data={countryList}
+              keyExtractor={(item) => item.code}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.countryItem}
+                  onPress={() => onSelectCountry(item)}
+                >
+                  <Text style={styles.flag}>{item.flag}</Text>
+                  <Text style={styles.countryName}>
+                    {item.name} (+{item.code})
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={styles.modalClose}
+              onPress={() => setIsCountryModalVisible(false)}
+            >
+              <Text style={styles.modalCloseText}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  //   container: {
-  //     flex: 1,
-  //     backgroundColor: "#F5F3F1",
-  //     flexDirection: "column",
-  //   },
   header: {
     marginTop: "24%",
     flexDirection: "row",
@@ -210,30 +254,81 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#631C11",
   },
-  passwordContainer: {
+  content: {
+    marginTop: 50,
+  },
+
+  phoneContainer: {
     flexDirection: "row",
     alignItems: "center",
     width: "86%",
     alignSelf: "center",
+    justifyContent: "center",
     borderBottomWidth: 2,
     borderRadius: 6,
     borderBottomColor: "#631C11",
     marginBottom: 10,
   },
-  content: {
-    marginTop: 50,
+  right: {
+    flexDirection: "row",
+    width: "70%",
   },
-  inputPassword: {
+  left: {
+    flexDirection: "row",
+    width: "20%",
+  },
+  phoneInput: {
     flex: 1,
     fontSize: 16,
     padding: 16,
     color: "#631C11",
   },
-  eyeButton: {
-    padding: 12,
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
-  eyeIcon: {
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+  },
+  countryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  flag: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  countryName: {
     fontSize: 18,
+  },
+  modalClose: {
+    marginTop: 10,
+    alignSelf: "center",
+  },
+  modalCloseText: {
+    fontSize: 16,
+    color: "red",
+  },
+  countryPickerButton: {
+    marginRight: 10,
+  },
+  countryCode: {
+    alignSelf: "center",
+    fontSize: 16,
+    fontWeight: "bold",
     color: "#631C11",
+  },
+  countryFlag: {
+    alignSelf: "left",
+    fontSize: 24,
+    color: "#fff",
   },
 });

@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { getBook } from "../../services/api/book"; // Importe a função da API
+import { getBook } from "../../services/api/book";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { ChevronLeft } from "lucide-react-native";
@@ -22,32 +23,20 @@ export default function UserAnuncios() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const userId = await AsyncStorage.getItem("userId"); // Pega o ID do usuário logado
+        const userId = await AsyncStorage.getItem("userId");
         if (!userId) {
           throw new Error("Usuário não logado");
         }
 
-        const response = await getBook(); // Busca todos os livros da API
-
+        const response = await getBook();
         if (!response.books) return;
 
         const userIdNumber = Number(userId);
-
-        // Separa os livros do usuário e os de outros usuários
         const userBooks = response.books.filter(
           (book) => book.ownerBook === userIdNumber
         );
 
-        const otherBooks = response.books.filter(
-          (book) => book.ownerBook !== userIdNumber
-        );
-
-        // Junta os livros do usuário primeiro, seguidos pelos outros, e ordena por ID
-        const sortedBooks = [...userBooks, ...otherBooks].sort(
-          (a, b) => b.id - a.id
-        );
-
-        setBooks(sortedBooks);
+        setBooks(userBooks);
       } catch (error) {
         console.log("Erro ao buscar livros:", error);
         Alert.alert("Erro", "Não foi possível carregar os anúncios.");
@@ -114,7 +103,7 @@ export default function UserAnuncios() {
                   <Text style={styles.bookTitle}>{book.nome}</Text>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>
-                      Anúnciado por você em:{" "}
+                      Anunciado por você em:{" "}
                       <Text style={styles.detailValue}>
                         {formatDate(book.createdAt)}
                       </Text>
