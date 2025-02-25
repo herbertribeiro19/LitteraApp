@@ -57,9 +57,6 @@ expo build:ios
 ```
 Or use **EAS Build** for optimized app production.
 
-## 🤝 Contributing
-Contributions are welcome! Feel free to fork the project and submit pull requests.
-
 ## 📄 License
 MIT License © 2024 Littera App
 
