@@ -46,23 +46,6 @@ npm start  # or expo start
 
 Scan the QR code with your Expo Go app or run the app on an emulator.
 
-## 🔧 Project Structure
-```
-Littera-App/
-│── src/
-│   ├── components/     # Reusable UI components
-│   ├── screens/        # App screens
-│   ├── navigation/     # Navigation setup
-│   ├── services/       # API and async storage functions
-│   ├── hooks/          # Custom React hooks
-│   ├── assets/         # Images, icons, and fonts
-│   └── styles/         # Global styles
-│── App.js              # Root component
-│── package.json        # Project dependencies
-│── babel.config.js     # Babel configuration
-│── .eslintrc.js        # ESLint config (if applicable)
-```
-
 ## 🚀 Deployment
 To build a production-ready app:
 ```sh
