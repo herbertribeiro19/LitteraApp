@@ -2,7 +2,7 @@
 
 Littera App is a mobile application built with **React Native**, **Expo**, and **JavaScript**. It provides an intuitive and dynamic interface for users to interact with digital content seamlessly.
 
-## 🚀 Features
+## 🚀 Main Features
 
 - 📖 **Smooth User Experience** – Built with React Native to ensure high performance and a native feel.
 - 🎨 **Modern UI/UX** – Styled with customizable components and a responsive design.
