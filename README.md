@@ -57,9 +57,33 @@ expo build:ios
 ```
 Or use **EAS Build** for optimized app production.
 
-## 📱 App Demonstration
+## 📱 App Demonstration + Images
 
 See the vídeos of application Littera App here: [https://www.youtube.com/playlist?list=PL4Nuv_SXDNLSCuUWjW5awZCnXnsBg7r-_](https://www.youtube.com/playlist?list=PL4Nuv_SXDNLSCuUWjW5awZCnXnsBg7r-_)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6a79e9e4-014c-4845-b974-8a26f78397e0" width="30%" />
+  <img src="https://github.com/user-attachments/assets/1485287a-bec6-4e80-a2ae-1ab986d4be1f" width="30%" />
+  <img src="https://github.com/user-attachments/assets/0daf30ad-7d49-41dd-b8de-050618049fe8" width="30%" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5500ae2e-bb8c-427c-8568-402e511dd0c4" width="30%" />
+  <img src="https://github.com/user-attachments/assets/219945bb-cffa-4c08-8635-612b9a7bcc02" width="30%" />
+  <img src="https://github.com/user-attachments/assets/407fc6b6-f9d1-4dea-b9e5-2626e753fe9f" width="30%" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5be2e4b1-6b7e-40c6-968d-778b3b493143" width="30%" />
+  <img src="https://github.com/user-attachments/assets/eb2647dd-39ae-4a59-ad38-501cbf371d5b" width="30%" />
+  <img src="https://github.com/user-attachments/assets/fb08992b-b7b3-46a0-89a7-5805782ec0ca" width="30%" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/483345c7-4af9-4a0e-9e12-80dbbde76b95" width="30%" />
+  <img src="https://github.com/user-attachments/assets/fbec0aee-22d0-45cc-8b6e-4dd79d249d10" width="30%" />
+  <img src="https://github.com/user-attachments/assets/de3659bc-35b2-44fe-83cd-ffe4cbb45d63" width="30%" />
+</p>
 
 ## 📄 License
 MIT License © 2024 Littera App
